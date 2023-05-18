@@ -1,4 +1,4 @@
-# team-weiß - Neuerln
+# team-grün - Torpedo Tactics
 
 This project consists of two main components: the frontend and the backend. The frontend is located in the app folder under sys-src and the backend is located in the server folder also under sys-src.
 
