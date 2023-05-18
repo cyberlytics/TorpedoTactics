@@ -1,0 +1,287 @@
+\documentclass[conference]{IEEEtran}
+\IEEEoverridecommandlockouts 
+% The preceding line is only needed to identify funding in the first footnote. If that is unneeded, please comment it out.
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{algorithmic}
+\usepackage{graphicx}
+\usepackage{textcomp}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\def\BibTeX{{\rm B\kern-.05em{\sc i\kern-.025em b}\kern-.08em
+    T\kern-.1667em\lower.7ex\hbox{E}\kern-.125emX}}
+
+\hypersetup{      
+	urlcolor=blue,
+}
+\begin{document}
+
+	\title{Torpedo Tactics}
+	\author{
+		\IEEEauthorblockN{1\textsuperscript{st} Feil Lukas}
+		\IEEEauthorblockA{
+			\textit{OTH Amberg-Weiden} \\
+			Bad Kötzting, Deutschland \\
+			l.feil@oth-aw.de
+		}
+		\and
+        \IEEEauthorblockN{2\textsuperscript{nd} Stefan Reger}
+		\IEEEauthorblockA{
+			\textit{OTH Amberg-Weiden} \\
+			Schwarzenfeld, Deutschland \\
+			s.reger@oth-aw.de
+		}
+        \and
+        \IEEEauthorblockN{3\textsuperscript{rd} Timon Spichtinger}
+		\IEEEauthorblockA{
+			\textit{OTH Amberg-Weiden} \\
+			Amberg, Deutschland \\
+			t.spichtinger@oth-aw.de
+		}
+        \and
+        \IEEEauthorblockN{4\textsuperscript{th} Manuel Pickl}
+		\IEEEauthorblockA{
+			\textit{OTH Amberg-Weiden} \\
+			Kümmersbrug, Deutschland \\
+			m.pickl@oth-aw.de
+		}
+        \and
+        \IEEEauthorblockN{5\textsuperscript{th} Gian Piero Cecchetti}
+		\IEEEauthorblockA{
+			\textit{OTH Amberg-Weiden} \\
+			Kümmersbrug, Deutschland \\
+			g.cecchetti@oth-aw.de
+		}
+        \and
+         \IEEEauthorblockN{5\textsuperscript{th} Alexander Hammer}
+		\IEEEauthorblockA{
+			\textit{OTH Amberg-Weiden} \\
+			Raitenbuch, Deutschland \\
+			a.hammer@oth-aw.de
+		}
+        \and
+        \IEEEauthorblockN{6\textsuperscript{th} Berkay}
+		\IEEEauthorblockA{
+			\textit{OTH Amberg-Weiden} \\
+			Amberg, Deutschland \\
+			email
+		}
+	}
+
+	\maketitle
+
+	\begin{abstract}
+		Kurzbeschreibung
+	\end{abstract}
+
+	\begin{IEEEkeywords}
+		Schlüsselwörter
+	\end{IEEEkeywords}
+
+	\section{Einführung}
+    Torpedo-Tactics ist ein rundenbasiertes Onlinespiel für zwei Spieler. Die Spieler versuchen die Schiffe des Gegners zu versenken, indem sie abwechselnd auf ein gegnerisches Feld schießen. Das Spiel endet, wenn ein Spieler alle Schiffe des Gegners versenkt hat.
+    Das Spiel kann dabei mit den klassischen aus dem Brettspiel bekannten Spielregeln gespielt werden. Alternativ bietet Torpedo-Tactics zusätzliche Modi mit erweiterten Möglichkeiten. Zur Verlängerung oder Verkürzung der Spieldauer kann die Spielfeldgröße angepasst werden.
+    Die Anzahl der Schiffe passt sich dabei automatisch an, um ein sinnvolles Setting zu gewährleisten. Zusätzlich bietet Torpedo Tactics optional weitere Handlungsmöglichkeiten. So führen spezielle Waffentypen zu neuen Möglichkeiten auf dem virtuellen Schlachtfeld. 
+    Beispielsweise ist es mit der Moab (Mother of all Bombs) möglich einen größeren Spielfeldbereich zu vernichten oder mit einem Laserstrahl eine ganze Linie von den Schiffen des Gegenspielers zu säubern. Einige Spielfeatures sollen Möglichkeiten zu taktischem Vorgehen bieten, so soll mit Hilfe der Satellitenüberwachung ein Teil des Meeres aufgedeckt werden können. \\
+	\ \\
+    \section{Motivation}
+	
+	\ \\
+	\section{Verwandte Arbeiten}
+	
+    \ \\
+	\section{Technisches Grundkonzept}
+	\subsection{Datenbank - Mongo DB}
+	Zur Speicherung von Nutzer und Spiel bzw. Chatdaten soll eine NoSQL MongoDB Datenbank zum Einsatz kommen. MontoDB Atlas bietet dafür einen kostenlosen Service, welcher eine gehostete MongoDB zu Verfügung stellt.
+    \ \\
+	\subsection{Backend - Express.js}
+	Das Backend soll auf einem in Node.js laufenden Express.js Server basieren. Dieser soll die gesammte Spiellogik implementieren und alle anfallenden Daten zur speicherung in die Datenbank leiten.
+    \ \\
+	\subsection{Schnittstellen - RESTFUL API}
+	Der Express Server sowie das Frontend sollen über eine Restfull API miteinander Kommunizieren. Es sollen dabei für jede Funktion bzw. jede Art von Daten eine eigene Domain sowohl im Frontend als auch im Backend erstellt werden.
+	\ \\
+	\subsection{Frontend - Vue PWA}
+	Für das Frontend soll mit Hilfe von Vue eine Progressiv Web App erstellt werden.
+    \ \\
+	\subsection{Deployment - AWS S3 und ECS}
+	Die Webseite soll als static Website über AWS S3 an die Clienten verteilt werden. Das Backend soll mit Hilfe eines Docker Containers in der AWS ECS gehostet werden.
+	\ \\
+	\section{Anforderungen}
+	Die Anforderungen werden in Form von User-Storys mit Akzeptanzkriterien formuliert. Die MUSS-Anforderungen definieren das ``Minimum Viable Product`` (MVP). Die SOLL-Anforderungen definieren gewünschte Funktionen welche angesprebt werden. Unter OPTIONAL ist mögliche Erweiterungen für das Produkt welche unter sehr guten Bedingungen bearbeiten werden.
+	\subsection{MUSS-Anforderungen}
+
+	\subsubsection{Spiel starten}
+	\ \\
+	Ich als Nutzer im Hauptmenü, möchte über einen Button ein Spiel starten, um einen Raum mit dem Code bzw. der ID des Benutzers zu erstellen, dem andere Spieler beitreten können. \\
+	\textbf{Akzeptanzkriterien:}
+	\begin{itemize}
+		\item Nach dem Knopfdruck wird der Spieler zum neu ertellten Raum weitergeleitet
+		\item Der Code bzw. die ID des Raumes wird angezeigt
+        \item Der Raum befindet sich bis zum Beitritt eines anderen Spielers im Wartezustand (wird auch angezeigt)
+        \item Das Spielfeld mit den zu verteilenden Schiffen wird angezeigt (siehe User Story "Spielfeld konfigurieren")
+	\end{itemize}
+	\ \\
+	\subsubsection{Spiel beitreten}
+	\ \\
+	Ich als Nutzer vor Beitritt eines Spiels, möchte alle offenen Räume in einer Liste sehen und über einen Button einen Raum beitreten, um in diesen Schiffe versenken zu spielen. \\
+	\textbf{Akzeptanzkriterien:}
+	\begin{itemize}
+		\item Durch Betätigen eines "Spiel beitreten" Buttons wird man zur Ansicht aller wartenden        Räume weitergeleitet
+		\item Nach Betätigen des jeweiligen "Beitritt" Buttons wird man zum zugehörigen Raum              weitergeleitet
+		\item Der Raum befindet sich daraufhin nicht mehr im Wartezustand
+		\item Das Spielfeld mit den zu verteilenden Schiffen wird angezeigt (siehe User Story             "Spielfeld konfigurieren")
+	\end{itemize}
+	\ \\
+    \subsubsection{Spielfeld konfigurieren}
+    \ \\
+    Ich als Nutzer in einem Raum, möchte die vorgegebenen Schiffe regelkonform am Spielfeld verteilen, um den anderen Spieler ebenfalls die Möglichkeit zu geben, Schiffe zu versenken. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Durch Auswählen eines Schifffeldes und eines Felds am Spielfeld wird das Schiff mit dem jeweiligen Feld auf diese Stelle gesetzt
+        \item Es können nur die Felder des Spielfelds ausgewählt werden, an denen das Schiff regelkonform abgesetzt werden kann
+        \item Wenn der Spieler alle Schiffe gesetzt hat wechselt er zu "Bereit"
+        \item Wenn beide Spieler "Bereit" sind, werden sie zum Spielbildschirm weitergeleitet und das Spiel startet
+    \end{itemize}
+    \ \\
+    \subsubsection{Spielfeld}
+    \ \\
+    Ich als Spieler, der sich in einem aktiven Spiel befindet, möchte mein Spielfeld und das des anderen Spielers, mit bereits abgeschossenen Feldern und Treffern sehen, um einen Überblick über den Spielverlauf zu behalten und die nächsten Schritte zu planen. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Mein Spielfeld und das Spielfeld des anderen Spielers werden nebeneinander angezeigt
+        \item Nur auf meinem Spielfeld werden Schiffe angezeigt
+        \item Bereits abgeschossene Felder werden ausgegraut
+        \item Getroffene Schiffsfelder werden hervorgehoben(rot)
+        \item Über den Spielfeld wird angezeigt, ob man an der Reihe ist
+    \end{itemize}
+    \ \\
+    \subsubsection{Schuss abgeben}
+    \ \\
+    Ich als Spieler, der in einem aktiven Spiel an der Reihe ist, möchte einen "Schuss" auf ein Feld des anderen Spielers abgeben, um dessen Schiffe zu treffen. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Am Spielfeld des anderen Spielers kann ein Feld ausgewählt werden, auf das "geschossen" wird
+        \item Es können nur die Felder ausgewählt werden, auf die nach den Regeln "geschossen" werden darf
+        \item Über die Anzeige des Feldes erhält der Spieler Feedback, ob ein Schiff getroffen wurde oder nicht
+        \item Wenn ein Schiff getroffen wurde, darf der Spieler nochmals einen "Schuss abgeben".
+        \item Wenn kein Schiff des anderen Spielers getroffen wurde, ist dieser an der Reihe und man kann keine Eingaben mehr tätigen
+        \item Der Spieler der das letzte Feld des letzten Schiffes des Gegners trifft gewinnt das Spiel
+    \end{itemize}
+    \ \\
+    \subsubsection{Spiel beenden}
+    \ \\
+    Ich als Spieler in einem aktiven Spiel möchte die Möglichkeit besitzen, dass Spiel abzubrechen, wenn ich es nicht beenden möchte oder kann. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Durch Betätigung des Buttons "Spiel abbrechen" wird das laufende Spiel abgebrochen
+        \item Für den abbrechenden Spieler wird das Spiel als Niederlage gewertet, für den anderen Spieler als Sieg
+        \item Nach Abbruch wird man zum Hauptmenü weitergeleitet
+    \end{itemize}
+    \ \\
+    \subsection{SOLL-Anforderungen}
+    \ \\
+    \subsubsection{Registrieren}
+    \ \\
+    Ich als nicht registrieter Nutzer möchte die Möglichkeit zur Registrierung besitzen, um meine Statistiken (W/L Ratio, längste/kürzeste/durchschnittliche Spieldauer, Fehlschussquote, etc. ) zur späteren Betrachtung speichern zu können. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Durch Betätigen eines "Registrieren" Buttons wird man zum Registrieren Formular weitergeleitet
+        \item Nach Eingabe des Benutzernamens und Passworts werden diese auf Gültigkeit geprüft
+        \item Sind Benutzername/Passwort gültig (einmalig) ist die Registrierung abgeschlossen, der "Account" kann verwendet werden und man wird zum Hauptmenü weitergeleitet
+    \end{itemize}
+    \ \\
+    \subsubsection{Anmelden}
+    \ \\
+    Ich als registrierter Nutzer im Anmeldebildschirm, möchte mich mit meinem Benutzernamen und Passwort anmelden, um meine Spielstatistiken anzusehen. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Durch Betätigen des "Anmelden" Buttons wird man zum Anmelde Formular weitergeleitet
+        \item Nach Eingabe des Benutzernamens und des Passworts wird geprüft ob der jeweilige Nutzer existiert
+        \item Bei existierenden Benutzer wird man zum Hauptmenü weitergeleitet
+        \item Bei nicht existierenden Benutzer wird "Falsche Eingabe" angezeigt und man bekommt eine Möglichkeit zur Wiederholung.
+    \end{itemize}
+    \ \\
+    \subsubsection{Statistiken ansehen}
+    \ \\
+    Ich als angemeldeter Nutzer im Hauptmenü möchte die Möglichkeit besitzen, meine Statistiken anzusehen, um Informationen über meine gespielten Spiele zu erhalten. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Über den Button "Statistiken ansehen" im Hauptmenü ruft man die Anzeige der Statistiken auf
+        \item Angezeigt wird W/L Radio, längste/kürzeste/durchschnittliche Spieldauer, Fehlschussquote, und Informationen zu den letzten 5 Spielen
+        \item Über den Button "Zum Hauptmenü" wird die Anzeige der Statistiken beendet und man wechselt ins Hauptmenü
+    \end{itemize}
+    \ \\
+    \subsubsection{Spielregeln ansehen}
+    \ \\
+    Ich als Nutzer im Hauptmenü möchte die Möglichkeit besitzen, Informationen über das Spiel zu erhalten, um mich mit den Regeln vertraut zu machen. \\
+     \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Ein Button öffnet die Anzeige der Spielregeln
+        \item Ein Button schließt die Anzeige der Spielregeln
+    \end{itemize}
+    \ \\
+    \subsubsection{Spielinfos}
+    Ich als Spieler, der gerade ein Spiel abgeschlossen hat, möchte Informationen über das Spiel angezeigt bekommen, um den Spielverlauf bewerten zu können. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Nach Abschluss des Spiels wird Sieg/Niederlage, Spieldauer und Fehlschussquote angezeigt
+        \item Über Betätigung des Buttons "Nochmal spielen" kann man innerhalb von 120 Sekunden gegen den gleichen Gegner spielen
+        \item Über Betätigung des Buttons "Hauptmenü" wechselt man zurück ins Hauptmenü
+    \end{itemize}
+    \ \\
+    \subsubsection{Chat}
+    Ich als Spieler in einem Spiel, möchte die Möglichkeit besitzen Nachrichten an den anderen Spieler zu senden bzw. Nachrichten zu empfangen, um mich mit ihm über das Spielgeschehen auszutauschen. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Der Chat wird im normalen Spiel in minimierter Darstellung angezeigt, es ist nur die letzte Nachricht des anderen Spielers sichtbar
+        \item Durch Anclicken des Chats wird dieser aufgedeckt
+        \item Bei aufgedeckten Chat können Nachrichten eingegeben werden die über einen "Senden" Button den anderen Spieler zugestellt werden. 
+        \item Die maximierte Ansicht des Chats kann über einen "Chat schließen" Button geschlossen werden
+    \end{itemize}
+    \ \\
+    \subsubsection{Automatische Schiffsverteilung}
+    Ich als Nutzer in einen Raum, möchte die Möglichkeit besitzen Schiffe automatisch auf meinem Spielfeld verteilen zu lassen, um dies nicht manuell ausführen zu müssen. \\
+    \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Nach Betätigung des Buttons "Automatische Schiffsverteilung" sollen alle benötigten Schiffe automatisch auf den Feld verteilt und angezeigt werden.
+        \item Danach kann der Spieler sich auf "Bereit" setzen oder die Schiffe über erneute Betätigung automatisch setzen lassen.
+        \item Die Schiffe sollen zufällig und regelkonform (passender Abstand, etc.) verteilt werden.
+    \end{itemize}
+    \ \\
+    \subsection{OPTIONALE-Anforderungen}
+    \ \\
+    \subsubsection{Spielanalyse}
+    Ich als Spieler nach Abschluss eines Spiels, möchte das gespielte Spiel Schritt für Schritt durchgehen und analysieren könenn, um Erkenntnisse über meine guten bzw. meine schlechten Aktionen zu gewinnen. \\
+     \textbf{Akzeptanzkriterien:}
+    \begin{itemize}
+        \item Über Betätigung des Buttons "Spiel Analyse" werde ich zur Analyse weitergeleitet
+        \item Der Analyse Bildschirm ist fast genau gleich zum Spiel Bildschirm.
+        \item Ein Schritt entspricht dem Spielzug eines Spielers
+        \item Es wird angezeigt in welchen Schritt man sich befindet
+        \item Über Buttons "Schritt vor" und "Schritt zurück" kann zwischen den Schritten gewechselt werden. Für jeden Schritt wird das Spielfeld (beide Ansichten) zum jeweiligen Zeitpunkt angezeigt
+        \item Über den Button "Spielanalyse beenden" beendet man die Spielanalyse und wechselt zurück ins Hauptmenü
+    \end{itemize}
+    \ \\
+    \subsubsection{Statistik-Vergleich mit Gegner}
+    Ich als Spieler in einem aktiven Spiel, möchte meine Statistiken mit denen meines Gegners vergleichen, um seine Fähigkeiten abzuschätzen. \\
+    \textbf{Akzeptanzkriterien}
+    \begin{itemize}
+        \item Während der Partie wird am Bildschirmrand eine Vergleichtabelle aufgeführt mit meinen Statistiken und denen meines Gegners.
+        \item Die Tabelle enthält Trefferquote, Getroffene Felder etc.
+    \end{itemize}
+    \ \\
+    \subsubsection{Besondere Features }
+    Ich als Nutzer möchte zusätzlich zum "traditionellen" Schiffe-Versenken weitere Features haben, um das Spiel spannender zu gestalten. \\
+    \textbf{Akzeptanzkriterien}
+    \begin{itemize}
+        \item Dem Spieler stehen pro Spiel eine begrenzte Anzahl besonderer Geschosse zur Verfügung, z. B. eine große Rakete, welche ein 3x3 Quadrat angreift. 
+        \item Dem Spieler stehen je nach ausgewählter Spielart verschiedene Schiffstypen und -größen zur Verfügung. 
+        \item Der Spieler kann wählen wie groß das Schlachfeld sein soll. Dabei kann er jegliche Werte zwischen einem Minimum und Maximum wählen.
+    \end{itemize}
+    \ \\
+
+	%\begin{thebibliography}{99}	
+	%\bibitem{example-wikipedia} \url{https://www.wikipedia.com/} 
+	%\end{thebibliography}
+
+\end{document}
