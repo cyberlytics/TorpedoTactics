@@ -5,16 +5,31 @@ const rows = ref(11) // Number of rows including the markers row
 const cols = ref(11) // Number of columns including the markers column
 
 const getColLetter = (i: any) => String.fromCharCode(65 + i) // 65 is the ASCII value for 'A'
+
+const drop = (e: any) => {
+  console.log(e)
+  const ship_id = e.dataTransfer.getData('ship_id')
+
+  const ship = document.getElementById(ship_id)
+
+  if (ship) {
+    ship.style.display = 'block'
+
+    ship.style.left = e.target.offsetLeft + 2 + 'px'
+    ship.style.top = e.target.offsetTop + 2 + 'px'
+
+    e.target.appendChild(ship)
+  }
+}
 </script>
 
 <template>
   <div class="battlefield-table-wrapper">
-    <table>
+    <table @dragover.prevent @drop.prevent="drop" id="game-field">
       <tbody>
         <tr v-for="y in rows" :key="y" class="battlefield-row">
           <td v-for="x in cols" :key="x" class="battlefield-cell battlefield-cell__empty">
             <div class="battlefield-cell-content" :data-y="y - 1" :data-x="x - 1">
-              <span class="z"></span>
               <div v-if="x === 1" class="marker marker__row">{{ y }}</div>
               <div v-if="y === 1" class="marker marker__col">{{ getColLetter(x - 1) }}</div>
             </div>
