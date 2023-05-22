@@ -144,37 +144,6 @@ paths:
                     example: User not found.
         
   /games:
-    post:
-      summary: Adds a game
-      description: Adds a game.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                playerid1:
-                  type: integer
-                playerid2:
-                  type: integer
-              required:
-                - playerid1
-                - playerid2
-      responses:
-        '200':
-          description: Successfully added a game
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Successfully added a game.
-                  gameID:
-                    type: integer
-                    example: 12345
   
     get:
       summary: Retrieves the game information
@@ -212,59 +181,6 @@ paths:
 
         '404':
           description: Game not found.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  error:
-                    type: string
-                    example: Game not found.
-  
-  /games/gamestate:
-    patch:
-      summary: refresh state of the game
-      description: Updates the game state.
-      parameters:
-        - name: gameID
-          in: query
-          description: Id from the game to update the state.
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                playerid:
-                  type: integer
-                  example: 1
-                round:
-                  type: integer
-                  example: 7
-                gameState:
-                  type: array
-                  items:
-                    type: integer
-                    example: 1, 4, 0, 1, 3, 4, 4, 1, 0
-              required:
-                - gameState
-      responses:
-        '200':
-          description: Successfully updated
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: Gamestate successfully updated.
-        '404':
-          description: Game not found
           content:
             application/json:
               schema:
