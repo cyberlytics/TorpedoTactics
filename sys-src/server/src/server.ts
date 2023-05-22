@@ -8,7 +8,6 @@ const start = async () => {
     console.log('Verbindung zur MongoDB hergestellt');
   })
   } catch (err){
-     // close server
       console.error(err);
   } 
 
