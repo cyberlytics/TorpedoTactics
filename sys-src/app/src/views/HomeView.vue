@@ -8,6 +8,6 @@ export default {
 </script>
 
 <template>
-  <Ship id="ship-1" />
+  <Ship id="ship-1" :size="3" />
   <Game />
 </template>
