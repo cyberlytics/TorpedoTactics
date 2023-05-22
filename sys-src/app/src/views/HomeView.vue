@@ -8,6 +8,6 @@ export default {
 </script>
 
 <template>
-  <Ship id="ship-1" draggable="true" />
+  <Ship id="ship-1" />
   <Game />
 </template>

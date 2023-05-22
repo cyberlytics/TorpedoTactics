@@ -1,52 +1,86 @@
 <template>
   <div
+    ref="ship"
     :id="id"
     class="ship"
-    @drag="drag"
-    @dragstart="dragStart"
-    @dragover.stop
     @mousedown="dragStart"
     @mousemove="drag"
-    :style="{ top: y + 'px', left: x + 'px' }"
+    :style="{ top: pos.y + 'px', left: pos.x + 'px' }"
+    :class="{ dragging: dragStopped }"
   ></div>
 </template>
 
 <script lang="ts">
 export default {
-  props: ['id', 'draggable'],
+  props: ['id'],
   data() {
     return {
       isDragging: false,
-      x: 0,
-      y: 0,
-      startX: 0,
-      startY: 0
+      dragStopped: false,
+      posValid: false,
+      pos: {
+        x: 0,
+        y: 0
+      },
+      startPos: {
+        x: 0,
+        y: 0
+      },
+      relPos: {
+        x: 0,
+        y: 0
+      }
     }
   },
   mounted() {
+    // get ship pos
+    this.pos = this.getPos()
+
+    // mouse up event handler
     window.addEventListener('mouseup', (e) => {
-      console.log(e)
       this.isDragging = false
+
+      // reset if pos is not valid
+      if (!this.posValid) {
+        this.pos = { x: -2, y: 108 }
+      }
     })
   },
+
   methods: {
+    getPos() {
+      const left = (this.$refs['ship'] as HTMLDivElement).getBoundingClientRect().left
+      const top = (this.$refs['ship'] as HTMLDivElement).getBoundingClientRect().top
+
+      return {
+        x: left,
+        y: top
+      }
+    },
+
     dragStart(e: any) {
-      this.startX = this.x - e.clientX
-      this.startY = this.y - e.clientY
+      this.startPos.x = this.pos.x - e.clientX
+      this.startPos.y = this.pos.y - e.clientY
       this.isDragging = true
-      // const target = e.target
-
-      // e.dataTransfer.setData('ship_id', target.id)
-
-      // delay to make element draggable
-      // setTimeout(() => {
-      //   target.style.display = 'none' // hiddes drag component
-      // }, 0)
     },
     drag(e: any) {
       if (!this.isDragging) return
-      this.x = e.clientX + this.startX
-      this.y = e.clientY + this.startY
+      this.checkPos(e.pageX, e.pageY)
+      if (this.posValid) {
+      } else {
+        this.pos.x = e.clientX + this.startPos.x
+        this.pos.y = e.clientY + this.startPos.y
+        const elBelow = this.getElementBelowPosition(e.pageX, e.pageY)
+        console.log(elBelow) // Log or do something with the element below
+      }
+    },
+    checkPos(x: number, y: number) {},
+    getElementBelowPosition(x: number, y: number) {
+      const topElement: any = document.elementFromPoint(x, y)
+      topElement.style.visibility = 'hidden' // Hide the top element
+      const belowElement = document.elementFromPoint(x, y) // Get the element below
+      topElement.style.visibility = '' // Show the top element again
+      return belowElement
     }
   }
 }
