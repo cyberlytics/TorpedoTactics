@@ -1,0 +1,191 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/ALEXHAM2000/TorpedoTactics/1.0.0
+info:
+  version: "1.0.0"
+  title: TorpedoTactics
+  description: API for the online game
+basepath: /api
+paths:
+  /auth/signup:
+    post:
+      summary: sign up
+      description: sign up from a new user.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: user successfully registered.
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjM0NTY3ODkwLCJpYXQiOjE2MjM0NTY5NjB9.0ci3rJbmRTWJ1cO-mrbv0P0NB1yS0H4gh6bAWT2DxgA
+        '400':
+          description: invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid user data.
+
+  /auth/signin:
+    post:
+      summary: user sign in
+      description: Logs a user in.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: successfully logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully logged in.
+                  token:
+                    type: string
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjM0NTY3ODkwLCJpYXQiOjE2MjM0NTY5NjB9.0ci3rJbmRTWJ1cO-mrbv0P0NB1yS0H4gh6bAWT2DxgA
+        '401':
+          description: Invalid sign in.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid user data.
+            
+  /stats:
+    get:
+      summary: Get user statistics
+      description: Get user statistics
+      parameters:
+        - name: userID
+          in: query
+          description: ID of the user whose statistics are to be retrieved.
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful retrieval of user statistics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userID:
+                    type: integer
+                    example: 12345
+                  username:
+                    type: string
+                    example: Benutzername
+                  gamesplayed:
+                    type: integer
+                    example: 10
+                  gameswon:
+                    type: integer
+                    example: 5
+                  timespend: 
+                    type: number
+                    example: 6.7
+                  hitmissrate:
+                    type: number
+                    example: 35.3
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: User not found.
+        
+  /games:
+  
+    get:
+      summary: Retrieves the game information
+      description: Retrieves the game information.
+      parameters:
+        - name: gameID
+          in: query
+          description: ID of the game whose information is to be retrieved.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successfully retrieve the game information
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  gameID:
+                    type: string
+                    example: 12345
+                  gameName:
+                    type: string
+                    example: Spielname
+                  playerids:
+                    type: array
+                    items:
+                      type: string
+                    example: ["8", "6"]
+                  gameState:
+                    type: array
+                    items:
+                      type: string
+
+        '404':
+          description: Game not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Game not found.
