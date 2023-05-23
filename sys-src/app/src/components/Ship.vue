@@ -7,33 +7,47 @@
     @mousemove="drag"
     @mouseup="dragEnd"
     @click="handleClick"
-    :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * 30 + 1 + 'px' }"
+    :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * 30 + 1 + 'px', height: '30px' }"
     :class="`${orientation !== 'h' ? 'vertical' : ''}`"
   ></div>
 </template>
 
 <script lang="ts">
+import {
+  cleanUpElements,
+  getElementBelowPosition,
+  getPos,
+  markElements,
+  validatePos
+} from '@/utils/utils'
+
 export default {
   props: ['id', 'size'],
   data() {
     return {
-      isDragging: false,
-      posValid: false,
-      isClickHandled: false,
-      prevEle: [],
-      orientation: 'h',
+      dragging: false,
+      validatedPos: false,
+      clicked: false,
+      prevEle: [], // all marked elements
+      orientation: 'h', // horizontal or vertical
+      // current position
       pos: {
         x: 500,
         y: 0
       },
+      // need to be updated when dragging
       startPos: {
         x: 0,
         y: 0
       },
+
+      // need to reset position
       originPos: {
         x: 500,
         y: 108
       },
+
+      // need to set pos when drag ends
       validPos: {
         x: 0,
         y: 0
@@ -41,125 +55,97 @@ export default {
     }
   },
   mounted() {
-    // get ship pos
-    this.pos = this.getPos()
+    // set position state on mount
+    this.pos = getPos(this.$refs['ship'] as HTMLDivElement)
   },
-
   methods: {
     handleClick() {
-      if (!this.isDragging && !this.isClickHandled) {
-        if (this.orientation === 'h') {
-          this.orientation = 'v'
-        } else {
-          this.orientation = 'h'
-        }
+      // this function handles the click event so that the ship can be dragged or rotated not both
+      if (!this.dragging && !this.clicked) {
+        this.orientation = this.orientation === 'h' ? 'v' : 'h'
       }
-      this.isClickHandled = false
-    },
-    getPos() {
-      const left = (this.$refs['ship'] as HTMLDivElement).getBoundingClientRect().left
-      const top = (this.$refs['ship'] as HTMLDivElement).getBoundingClientRect().top
 
-      return {
-        x: left,
-        y: top
-      }
-    },
+      // clean up marked elements
+      cleanUpElements(this.prevEle)
 
+      // reset flag
+      this.clicked = false
+    },
     dragStart(e: any) {
+      // adjust start position
       this.startPos.x = this.pos.x - e.clientX
       this.startPos.y = this.pos.y - e.clientY
-      this.isDragging = true
-      this.isClickHandled = false
+
+      // set flags
+      this.dragging = true
+      this.clicked = false
     },
     drag(e: any) {
-      if (!this.isDragging) return
-      this.checkPos(e.pageX, e.pageY)
+      // stop if dragging is false
+      if (!this.dragging) return
 
+      // check position on drag
+      this.checkPos(e.pageX, e.pageY)
       this.pos.x = e.clientX + this.startPos.x
       this.pos.y = e.clientY + this.startPos.y
 
-      this.isClickHandled = true
+      // set click flag
+      this.clicked = true
     },
     dragEnd() {
-      this.isDragging = false
+      // set dragging flag
+      this.dragging = false
 
-      // reset if pos is not valid
-      if (!this.posValid) {
-        this.pos = { ...this.originPos }
-      } else {
-        this.pos = { ...this.validPos }
-      }
+      // set position of ship
+      this.pos = this.validatedPos ? { ...this.validPos } : { ...this.originPos }
     },
     markElements(x: number, y: number) {
-      this.cleanUpElements() //clean up elements before assigning new ones
+      // clean up previous elements
+      cleanUpElements(this.prevEle)
 
-      const eles = []
-      if (this.orientation === 'h') {
-        for (let i = 0; i < this.size; i++) {
-          eles.push(document.querySelector(`[data-x="${x + i}"][data-y="${y}"]`))
-        }
-      } else {
-        for (let i = 0; i < this.size; i++) {
-          eles.push(document.querySelector(`[data-y="${y + i}"][data-x="${x}"]`))
-        }
-      }
+      // get new elements
+      this.prevEle = markElements(x, y, this.size, this.orientation)
 
-      eles.forEach((ele) => {
-        if (ele) {
-          ele.style.backgroundColor = 'green'
-          this.prevEle.push(ele) //add elements to prevEle
-        }
-      })
-    },
-    cleanUpElements() {
+      // mark elements
       this.prevEle.forEach((ele) => {
         if (ele) {
-          ele.style.backgroundColor = '' //reset color
+          ele.style.backgroundColor = this.validatedPos ? 'green' : 'red'
         }
       })
-      this.prevEle = [] //empty the array
-    },
-    validatePos(x: number, y: number) {
-      if (this.orientation === 'h' && x + this.size - 1 > 10) {
-        return false
-      }
-      return !(this.orientation === 'v' && y + this.size - 1 > 10)
     },
     checkPos(x: number, y: number) {
-      const ele = this.getElementBelowPosition(x, y) as HTMLElement
+      const ele = getElementBelowPosition(x, y)
 
+      // check if position is in valid area
       if (
         ele &&
         ele.getAttribute('data-x') &&
         ele.getAttribute('data-y') &&
-        this.validatePos(Number(ele.getAttribute('data-x')), Number(ele.getAttribute('data-y')))
+        validatePos(
+          Number(ele.getAttribute('data-x')),
+          Number(ele.getAttribute('data-y')),
+          this.size,
+          this.orientation
+        )
       ) {
-        this.posValid = true
+        // set position as valid
+        this.validatedPos = true
+
+        // calculate valid position
         const { top, left } = ele.getBoundingClientRect()
-
-        // margin of game field
         const topMargin = 45
-
-        // navigation height
         const navHeight = 65
-
-        // adjusted valid position
         this.validPos = { x: left + 2, y: top - topMargin - navHeight + 2 }
 
-        // style element
+        // mark elements in valid position
         this.markElements(Number(ele.getAttribute('data-x')), Number(ele.getAttribute('data-y')))
       } else {
-        this.cleanUpElements()
-        this.posValid = false
+        // clean up elements
+        cleanUpElements(this.prevEle)
+
+        // set position as invalid
+        this.validatedPos = false
       }
-    },
-    getElementBelowPosition(x: number, y: number) {
-      const topElement: any = document.elementFromPoint(x, y)
-      topElement.style.visibility = 'hidden' // Hide the top element
-      const belowElement = document.elementFromPoint(x, y) // Get the element below
-      topElement.style.visibility = '' // Show the top element again
-      return belowElement
     }
   }
 }
