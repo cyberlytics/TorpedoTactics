@@ -5,7 +5,8 @@
     class="ship"
     @mousedown="dragStart"
     @mousemove="drag"
-    @click="changeOrientation"
+    @mouseup="dragEnd"
+    @click="handleClick"
     :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * 30 + 1 + 'px' }"
     :class="`${orientation !== 'h' ? 'vertical' : ''}`"
   ></div>
@@ -18,6 +19,7 @@ export default {
     return {
       isDragging: false,
       posValid: false,
+      isClickHandled: false,
       prevEle: null,
       orientation: 'h',
       pos: {
@@ -41,29 +43,18 @@ export default {
   mounted() {
     // get ship pos
     this.pos = this.getPos()
-
-    // mouse up event handler
-    window.addEventListener('mouseup', (e) => {
-      e.preventDefault()
-      this.isDragging = false
-
-      // reset if pos is not valid
-      if (!this.posValid) {
-        this.pos = { ...this.originPos }
-      } else {
-        this.pos = { ...this.validPos }
-      }
-    })
   },
 
   methods: {
-    changeOrientation() {
-      if (this.isDragging) return
-      if (this.orientation === 'h') {
-        this.orientation = 'v'
-      } else {
-        this.orientation = 'h'
+    handleClick() {
+      if (!this.isDragging && !this.isClickHandled) {
+        if (this.orientation === 'h') {
+          this.orientation = 'v'
+        } else {
+          this.orientation = 'h'
+        }
       }
+      this.isClickHandled = false
     },
     getPos() {
       const left = (this.$refs['ship'] as HTMLDivElement).getBoundingClientRect().left
@@ -79,26 +70,35 @@ export default {
       this.startPos.x = this.pos.x - e.clientX
       this.startPos.y = this.pos.y - e.clientY
       this.isDragging = true
+      this.isClickHandled = false
     },
     drag(e: any) {
       if (!this.isDragging) return
-      this.checkPos(e.pageX, e.pageY, e)
+      this.checkPos(e.pageX, e.pageY)
 
       this.pos.x = e.clientX + this.startPos.x
       this.pos.y = e.clientY + this.startPos.y
+
+      this.isClickHandled = true
+    },
+    dragEnd() {
+      this.isDragging = false
+
+      // reset if pos is not valid
+      if (!this.posValid) {
+        this.pos = { ...this.originPos }
+      } else {
+        this.pos = { ...this.validPos }
+      }
     },
     markElements(x: number, y: number) {},
     validatePos(x: number, y: number) {
       if (this.orientation === 'h' && x + this.size - 1 > 10) {
         return false
       }
-      if (this.orientation === 'v' && y + this.size - 1 > 10) {
-        return false
-      }
-
-      return true
+      return !(this.orientation === 'v' && y + this.size - 1 > 10)
     },
-    checkPos(x: number, y: number, e: MouseEvent) {
+    checkPos(x: number, y: number) {
       const ele = this.getElementBelowPosition(x, y) as HTMLElement
 
       if (
@@ -144,8 +144,8 @@ export default {
 .ship {
   width: 2em;
   height: 2em;
-  padding-right: 0px;
-  padding-bottom: 0px;
+  padding-right: 0;
+  padding-bottom: 0;
   cursor: move !important;
   z-index: 10;
   left: 0;
