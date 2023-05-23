@@ -1,15 +1,13 @@
 import express from 'express'
 import 'express-async-errors'
 import cookieSession from 'cookie-session'
+import router from './routes/router'
 
 // errors
 import { NotFoundError } from './errors/not-found-error'
 
 // middlewares
 import { errorHandler } from './middlewares/error-handler'
-
-// routes
-import { signoutRouter } from './routes/signout'
 
 // create server
 const app = express()
@@ -32,9 +30,9 @@ app.use(
 )
 
 /**
- * Here are the primary routes of the app
+ * The routes of the app are defined in the routes/router.ts file
  */
-app.use(signoutRouter)
+app.use('/', router())
 app.all('*', async () => {
   throw new NotFoundError()
 })
