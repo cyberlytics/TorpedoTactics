@@ -20,7 +20,7 @@ export default {
       isDragging: false,
       posValid: false,
       isClickHandled: false,
-      prevEle: null,
+      prevEle: [],
       orientation: 'h',
       pos: {
         x: 500,
@@ -91,7 +91,35 @@ export default {
         this.pos = { ...this.validPos }
       }
     },
-    markElements(x: number, y: number) {},
+    markElements(x: number, y: number) {
+      this.cleanUpElements() //clean up elements before assigning new ones
+
+      const eles = []
+      if (this.orientation === 'h') {
+        for (let i = 0; i < this.size; i++) {
+          eles.push(document.querySelector(`[data-x="${x + i}"][data-y="${y}"]`))
+        }
+      } else {
+        for (let i = 0; i < this.size; i++) {
+          eles.push(document.querySelector(`[data-y="${y + i}"][data-x="${x}"]`))
+        }
+      }
+
+      eles.forEach((ele) => {
+        if (ele) {
+          ele.style.backgroundColor = 'green'
+          this.prevEle.push(ele) //add elements to prevEle
+        }
+      })
+    },
+    cleanUpElements() {
+      this.prevEle.forEach((ele) => {
+        if (ele) {
+          ele.style.backgroundColor = '' //reset color
+        }
+      })
+      this.prevEle = [] //empty the array
+    },
     validatePos(x: number, y: number) {
       if (this.orientation === 'h' && x + this.size - 1 > 10) {
         return false
@@ -110,7 +138,7 @@ export default {
         this.posValid = true
         const { top, left } = ele.getBoundingClientRect()
 
-        // margin of gamefield
+        // margin of game field
         const topMargin = 45
 
         // navigation height
@@ -120,13 +148,10 @@ export default {
         this.validPos = { x: left + 2, y: top - topMargin - navHeight + 2 }
 
         // style element
-        if (this.prevEle) this.prevEle.style.background = 'none'
-        ele.style.background = 'green'
-        this.prevEle = ele
+        this.markElements(Number(ele.getAttribute('data-x')), Number(ele.getAttribute('data-y')))
       } else {
-        if (this.prevEle) this.prevEle.style.background = 'none'
+        this.cleanUpElements()
         this.posValid = false
-        ele.style.background = ''
       }
     },
     getElementBelowPosition(x: number, y: number) {
