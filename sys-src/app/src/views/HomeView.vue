@@ -9,5 +9,6 @@ export default {
 
 <template>
   <Ship id="ship-1" :size="3" />
+  <Ship id="ship-1" :size="3" />
   <Game />
 </template>

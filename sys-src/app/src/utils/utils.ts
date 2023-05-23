@@ -1,5 +1,38 @@
+import { useFieldStore } from '@/stores/field'
+
+export function savePositions(x: number, y: number, size: number, orientation: string) {
+  const store = useFieldStore() // Use the store
+
+  if (orientation === 'h') {
+    for (let i = 0; i < size; i++) {
+      store.setPos(x + i, y)
+    }
+  } else {
+    for (let i = 0; i < size; i++) {
+      store.setPos(x, y + i)
+    }
+  }
+}
+
+// TODO needs to be extended
 export function validatePos(x: number, y: number, size: number, orientation: string): boolean {
-  // TODO needs to be extended
+  const store = useFieldStore() // Use the store
+
+  // Check if new position conflicts with any existing positions
+  let isConflict = false
+  for (let i = 0; i < size; i++) {
+    if (orientation === 'h') {
+      isConflict = store.field.some((pos: any) => pos.x === x + i && pos.y === y)
+    } else {
+      isConflict = store.field.some((pos: any) => pos.x === x && pos.y === y + i)
+    }
+    if (isConflict) break
+  }
+
+  if (isConflict) {
+    return false
+  }
+
   if (orientation === 'h' && x + size - 1 > 10) {
     return false
   }

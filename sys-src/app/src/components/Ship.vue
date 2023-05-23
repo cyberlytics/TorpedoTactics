@@ -7,7 +7,7 @@
     @mousemove="drag"
     @mouseup="dragEnd"
     @click="handleClick"
-    :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * 30 + 1 + 'px', height: '30px' }"
+    :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * 31 + 'px', height: '31px' }"
     :class="`${orientation !== 'h' ? 'vertical' : ''}`"
   ></div>
 </template>
@@ -18,7 +18,8 @@ import {
   getElementBelowPosition,
   getPos,
   markElements,
-  validatePos
+  validatePos,
+  savePositions
 } from '@/utils/utils'
 
 export default {
@@ -50,7 +51,9 @@ export default {
       // need to set pos when drag ends
       validPos: {
         x: 0,
-        y: 0
+        y: 0,
+        dataX: 0,
+        dataY: 0
       }
     }
   },
@@ -79,6 +82,8 @@ export default {
       // set flags
       this.dragging = true
       this.clicked = false
+
+      // TODO on drag clean up store -- here or in drag
     },
     drag(e: any) {
       // stop if dragging is false
@@ -91,6 +96,8 @@ export default {
 
       // set click flag
       this.clicked = true
+
+      // TODO on drag clean up store
     },
     dragEnd() {
       // set dragging flag
@@ -98,6 +105,9 @@ export default {
 
       // set position of ship
       this.pos = this.validatedPos ? { ...this.validPos } : { ...this.originPos }
+
+      // save positions into store
+      savePositions(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
     },
     markElements(x: number, y: number) {
       // clean up previous elements
@@ -109,6 +119,7 @@ export default {
       // mark elements
       this.prevEle.forEach((ele) => {
         if (ele) {
+          console.log(this.validatedPos)
           ele.style.backgroundColor = this.validatedPos ? 'green' : 'red'
         }
       })
@@ -135,16 +146,23 @@ export default {
         const { top, left } = ele.getBoundingClientRect()
         const topMargin = 45
         const navHeight = 65
-        this.validPos = { x: left + 2, y: top - topMargin - navHeight + 2 }
-
-        // mark elements in valid position
-        this.markElements(Number(ele.getAttribute('data-x')), Number(ele.getAttribute('data-y')))
+        this.validPos = {
+          x: this.orientation === 'h' ? left + 1.5 : left + 2.5,
+          y: top - topMargin - navHeight + 1.5,
+          dataX: Number(ele.getAttribute('data-x')),
+          dataY: Number(ele.getAttribute('data-y'))
+        }
       } else {
         // clean up elements
         cleanUpElements(this.prevEle)
 
         // set position as invalid
         this.validatedPos = false
+      }
+
+      if (ele) {
+        // mark cells
+        this.markElements(Number(ele.getAttribute('data-x')), Number(ele.getAttribute('data-y')))
       }
     }
   }
@@ -153,8 +171,6 @@ export default {
 
 <style>
 .ship {
-  width: 2em;
-  height: 2em;
   padding-right: 0;
   padding-bottom: 0;
   cursor: move !important;
