@@ -9,7 +9,7 @@ export default (router: express.Router) => {
      * Register a User.
      * * @route POST /api/auth/signup
      */
-    router.post('/auth/signup',
+    router.post('/api/auth/signup',
     [
       body('password')
         .trim()
@@ -23,11 +23,21 @@ export default (router: express.Router) => {
     validateRequest,
     register);
 
-    router.post('/auth/signin', login);
+    /**
+     * Login with a User.
+     * * @route POST /api/auth/signin
+     */
+    router.post('/api/auth/signin',
+    [
+      body('email').isEmail().withMessage('Email must be valid'),
+      body('password').trim().notEmpty().withMessage('You must supply a password')
+    ],
+    validateRequest,
+    login);
 
     /**
      * Clears the request session.
      * * @route POST /api/auth/signout
      */
-    router.post('/auth/signout', signout);
+    router.post('/api/auth/signout', signout);
 };
