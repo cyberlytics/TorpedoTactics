@@ -8,15 +8,15 @@ import {ref, onMounted} from "vue"
 const users = ref([])
 
 onMounted(()=>{
-  const fetch = async ()=>{
-    const res = await axios.get("http://localhost:3000/api/test")
-    const s =  res.data.user
-  users.value.push(...s)
-    console.log(users)
+  // const fetch = async ()=>{
+  //   const res = await axios.get("http://localhost:3000/api/test")
+  //   const s =  res.data.user
+  // users.value.push(...s)
+  //   console.log(users)
 
-  }
+  // }
 
-  (fetch())
+  // (fetch())
 })
 
 </script>
