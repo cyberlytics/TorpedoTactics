@@ -1,7 +1,7 @@
 import express from 'express';
-import { login, register, signout } from '../controllers/authentication.js';
-import { validateRequest } from '../middlewares/validate-request.js';
-import { BCRYPT_MAX_LENGTH, BCRYPT_MIN_LENGTH, passwordRegex } from 'src/config/auth.config.js';
+import { login, register, signout } from '../controllers/authentication';
+import { validateRequest } from '../middlewares/validate-request';
+import { BCRYPT_MAX_LENGTH, BCRYPT_MIN_LENGTH, passwordRegex } from '../config/auth.config';
 import { body } from 'express-validator';
 
 export default (router: express.Router) => {

@@ -14,5 +14,5 @@ export const validateRequest =  (
     throw new RequestValidationError(errors.array());
   }
 
-  return next();
+  next();
 };

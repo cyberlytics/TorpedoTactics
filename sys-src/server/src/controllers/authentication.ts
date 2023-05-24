@@ -1,7 +1,7 @@
 import express from 'express';
 import { BadRequestError } from '../errors/bad-request-error';
 import { Password } from '../services/password';
-import jwt from 'jsonwebtoken';
+//import jwt from 'jsonwebtoken';
 
 export const login = async (req: express.Request, res: express.Response) => {
     try {
@@ -34,25 +34,22 @@ export const login = async (req: express.Request, res: express.Response) => {
         }
 
         // Generate JWT
-        const userJwt = jwt.sign(
-          {
-            id: existingUser.userid,
-            username: existingUser.username
-          },
-          process.env.JWT_KEY! // ad key to env file
-        )
+        // const userJwt = jwt.sign(
+        //   {
+        //     id: existingUser.userid,
+        //     username: existingUser.username
+        //   },
+        //   process.env.JWT_KEY! // ad key to env file
+        // )
         // Store it on session object
-        req.session = {
-          jwt: userJwt
-        }
+        // req.session = {
+        //   jwt: userJwt
+        // }
 
         return res.status(200).send({
           userID: existingUser.userid,
           username: existingUser.username,
         })
-
-
-
     }catch (err: any) {
         res.status(500).json({message: err.message});
         return;
@@ -67,13 +64,12 @@ export const register =async (req: express.Request, res: express.Response) => {
             return;
         }
 
-
           // find existing username in database
 
           // throw bad request error if user exist
 
           // hash password
-          const passwordHash = await Password.toHash(password);
+          //const passwordHash = await Password.toHash(password);
 
           // create database transaction to save user
 
@@ -92,7 +88,7 @@ export const register =async (req: express.Request, res: express.Response) => {
 
 export const signout = async (req: express.Request, res: express.Response) => {
   try {
-    req.session = null
+    // req.session = null
 
     return res.status(200).send({ message: 'Successful signed out!' })
   }catch (err: any) {

@@ -17,7 +17,7 @@ export class RequestValidationError extends BaseError {
           message: err.msg,
           log_level: 'Error',
           http_status_codes: [400],
-          suggested_application_actions: [`Check field: ${err.param}`],
+          suggested_application_actions: [`Check field: ${err}`],
         },
       };
     });
