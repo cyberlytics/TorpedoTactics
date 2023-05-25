@@ -23,7 +23,7 @@ const props = defineProps({
 
 const enemy = computed(() => {
     const enemy = props.publicGameMetadata?.players
-        .filter((playerName) => playerName != props.userName);
+        .filter((playerName) => playerName != props.userName)[0];
     
     return enemy;
 });
