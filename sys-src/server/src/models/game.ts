@@ -41,20 +41,31 @@ const gameSchema : Schema<IGame, IGameModel> = new Schema<IGame, IGameModel>({
 
 //static methods
 gameSchema.statics.addGame = async function(id1: Schema.Types.ObjectId, id2: Schema.Types.ObjectId): Promise<HydratedDocument<IGame, IGameMethods>> {
-   const newGame : IGame = {playerid1: id1, playerid2: id2, state: Gamestate.preparation, started: Date.now(), gamehistory: []};
+   const newGame : IGame = {
+    playerid1: id1,
+    playerid2: id2,
+    state: Gamestate.preparation,
+    started: Date.now(),
+    gamehistory: []};
    return await this.create(newGame);
 };
+
 
 gameSchema.statics.getGames = async function():Promise<HydratedDocument<IGame, IGameMethods>[]> {
     return await this.find();
 };
 
+
+gameSchema.statics.getGame= async function (gameId: Schema.Types.ObjectId):Promise<HydratedDocument<IGame, IGameMethods>[]> {
+    return await this.find(gameId);    
+}
+
+
+
 /*
     Next static Functions:
     - getGame(gameid)
 */
-
-
 
 //instance methods
 gameSchema.methods.changeState = async function(newstate:Gamestate):Promise<HydratedDocument<IGame, IGameMethods>>{
