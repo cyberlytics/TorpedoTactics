@@ -1,4 +1,5 @@
 import { app } from './app'
+import { SocketManager } from './services/socketManager';
 import mongoose from 'mongoose';
 
 const start = async () => {
@@ -7,6 +8,9 @@ const start = async () => {
   .then(() => {
     console.log('Verbindung zur MongoDB hergestellt');
   })
+
+    // initialize SocketManager
+    new SocketManager().initialize();
   } catch (err){
       console.error(err);
   } 
