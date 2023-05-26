@@ -19,7 +19,7 @@ var app = express()
  * the express server
  */
 
-// server.set('trust proxy', true) only necessary if server sits behind a proxy
+// app.set('trust proxy', true) only necessary if server sits behind a proxy
 
 app.use(express.json()) // parse body
 
@@ -44,7 +44,7 @@ app.all('*', async () => {
  */
 app.use(errorHandler)
 
-// don't know if this breaks functionality above,
+// don't know if this breaks functionality of anything,
 // but socket.io requires http module
 app = require('http').Server(app);
 
