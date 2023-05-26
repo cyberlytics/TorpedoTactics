@@ -1,4 +1,4 @@
-import { Player } from "src/types/player";
+import { GameParticipant } from "src/types/gameParticipant";
 import { getRandomElementFromArray } from "./helperFunctions";
 
 export class Room {
@@ -6,11 +6,11 @@ export class Room {
     id: string;
     name: string;
     ingame: boolean = false;
-    players: Player[];
+    players: GameParticipant[];
     maxPlayers: number;
 
     // game
-    currentPlayer: Player | null;
+    currentPlayer: GameParticipant | null;
 
     constructor(id: string, name: string) {
         this.id = id;

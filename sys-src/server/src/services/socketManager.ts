@@ -1,6 +1,6 @@
 import { PublicGameMetadata } from "../types/publicGameMetadata";
 import { app } from "../app";
-import { Player } from "../types/player";
+import { GameParticipant } from "../types/gameParticipant";
 import { PublicRoomData } from "../types/publicRoomData";
 import { SocketRoom } from "../types/socketRoom";
 import { Room } from "./room";
@@ -54,7 +54,7 @@ export class SocketManager {
  
   disconnectUser(userId: string) {
     // find joined game
-    let joinedRoom = this.rooms.filter(room => room.players.some((player: Player) => player.id == userId))[0];
+    let joinedRoom = this.rooms.filter(room => room.players.some((player: GameParticipant) => player.id == userId))[0];
     if (joinedRoom) {
       this.leaveRoom(joinedRoom, userId);
     }
@@ -90,7 +90,7 @@ export class SocketManager {
         }
 
         // add and subscribe player to room
-        room.players.push(new Player(socket.id, userName));
+        room.players.push(new GameParticipant(socket.id, userName));
         socket.join(room.id);
   
         // start game if full
@@ -110,7 +110,7 @@ export class SocketManager {
 
   leaveRoom(room: Room, userId: string) {
     // leave joined games
-    room.players = room.players.filter((player: Player) => player.id != userId);
+    room.players = room.players.filter((player: GameParticipant) => player.id != userId);
 
     // close room if empty
     if (room.players.length == 0) {

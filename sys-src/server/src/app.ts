@@ -12,7 +12,7 @@ import { errorHandler } from './middlewares/error-handler'
 import { signoutRouter } from './routes/signout'
 
 // create server
-const server = express()
+var app = express()
 
 /**
  * The code below will configure
@@ -21,9 +21,9 @@ const server = express()
 
 // server.set('trust proxy', true) only necessary if server sits behind a proxy
 
-server.use(express.json()) // parse body
+app.use(express.json()) // parse body
 
-server.use(
+app.use(
   cookieSession({
     // store session data within a cookie
     signed: false,
@@ -34,18 +34,18 @@ server.use(
 /**
  * Here are the primary routes of the app
  */
-server.use(signoutRouter)
-server.all('*', async () => {
+app.use(signoutRouter)
+app.all('*', async () => {
   throw new NotFoundError()
 })
 
 /**
  * Error handling
  */
-server.use(errorHandler)
+app.use(errorHandler)
 
 // don't know if this breaks functionality above,
 // but socket.io requires http module
-const app = require('http').Server(server);
+app = require('http').Server(app);
 
 export { app }
