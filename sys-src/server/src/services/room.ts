@@ -17,7 +17,6 @@ export class Room {
         this.name = name;
         this.players = [];
         this.maxPlayers = 2;
-        
         this.currentPlayer = null;
     }
 
@@ -27,6 +26,10 @@ export class Room {
 
     isFull() {
         return (this.playerCount() >= this.maxPlayers);
+    }
+
+    allPlayersReady() : boolean {
+        return (this.players.every(player => player.ready == true));
     }
 
     startGame() {

@@ -4,11 +4,13 @@
     </div>
     <div class="table">
         Current player: {{ publicGameMetadata?.currentPlayerName }}
+        <button @click="completePreparation()">Ready</button>
     </div>
     <div class="player">
         <h3>player: {{ userName }}</h3>
     </div>
 </template>
+
 
 <script setup lang="ts">
 //#region imports
@@ -27,6 +29,13 @@ const enemy = computed(() => {
     
     return enemy;
 });
+
+const emit = defineEmits(['completePreparation']);
+
+
+function completePreparation() {
+  emit('completePreparation');
+}
 </script>
 
 <style>

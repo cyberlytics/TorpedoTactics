@@ -5,6 +5,7 @@
     />
     <Game v-else
       :userName="userName" :publicGameMetadata="publicGameMetadata"
+      @completePreparation="completePreparation"
     />
 </template>
 
@@ -17,6 +18,7 @@ import Game from '../components/game/Game.vue';
 import type { PublicGameMetadata } from '@/types/publicGameMetadata';
 import type { PublicRoomData } from '@/types/publicRoomData';
 import { SocketRoom } from '@/types/socketRoom';
+import { Battlefield, cellState } from '@/types/battlefield';
 //#endregion imports
 
 const url = 'http://localhost:3000';
@@ -27,6 +29,7 @@ const currentRoomId = ref<string>();
 const publicGameMetadata = ref<PublicGameMetadata>();
 const userName = ref<string>(getRandomName());
 
+const battlefieldSize : number = 11;
 
 //#region subscribe
 
@@ -34,8 +37,13 @@ socket.on(SocketRoom.lobbyRoomsChanged, (openRooms: PublicRoomData[]) => {
   roomData.value = openRooms;
 });
 
+socket.on(SocketRoom.preparationStarted, () =>{
+
+});
+
+
 socket.on(SocketRoom.gameStarted, () => {
-  // do something
+   console.log("Game has been started");
 });
 
 socket.on(SocketRoom.gamedataPublished, (gameMetadata: PublicGameMetadata) => {
@@ -47,6 +55,7 @@ socket.on(SocketRoom.gamedataPublished, (gameMetadata: PublicGameMetadata) => {
 //#region publish
 
 function createRoom() {
+  console.log("create room");
   socket.emit(
     SocketRoom.roomCreated, 
     userName.value
@@ -56,11 +65,22 @@ function createRoom() {
 }
 
 function joinRoom(roomId: string) {
+  console.log("join room");
   currentRoomId.value = roomId;
 
   socket.emit(
     SocketRoom.roomJoined,
     roomId, userName.value
+  );
+}
+
+function completePreparation(){
+  console.log("start game");
+  socket.emit(
+    SocketRoom.preparationCompleted,
+    currentRoomId.value,
+    userName.value,
+    getRandomBattlefied(),
   );
 }
 
@@ -70,6 +90,19 @@ function joinRoom(roomId: string) {
 function getRandomName() {
   const randomNumber = Math.floor(Math.random() * 100);
   return `User${randomNumber}`;
+}
+
+function getRandomBattlefied() : Battlefield{
+  const randomGrid : cellState[][] =  Array.from({ length: battlefieldSize }, () =>
+    Array.from({ length: battlefieldSize }, () => getRandomCellState())
+  );
+  return new Battlefield(randomGrid);
+}
+
+function getRandomCellState() : cellState {
+  const values = [cellState.empty, cellState.ship];
+  const randomIndex = Math.floor(Math.random() * values.length);
+  return values[randomIndex];
 }
 
 </script>

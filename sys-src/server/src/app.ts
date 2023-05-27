@@ -12,6 +12,8 @@ import { errorHandler } from './middlewares/error-handler'
 // create server
 var app = express()
 
+
+
 /**
  * The code below will configure
  * the express server
