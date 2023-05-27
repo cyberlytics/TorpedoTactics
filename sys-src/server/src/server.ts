@@ -1,4 +1,5 @@
 import { app } from './app'
+import { SocketManager } from './services/socketManager';
 import mongoose, {HydratedDocument} from 'mongoose';
 import { IGame,Game, Gamestate, IGameMethods } from './models/game';
 //import { IPlayer,Player } from './models/player'
@@ -23,7 +24,8 @@ const start = async () => {
 
   })
 
-
+    // initialize SocketManager
+    new SocketManager().initialize();
   } catch (err){
       console.error(err);
   } 
