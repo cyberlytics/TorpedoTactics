@@ -1,20 +1,47 @@
 import { useFieldStore } from '@/stores/field'
 
+export function onField(x: number, y: number) {
+  const field = document.getElementById('game-field')
+
+  if (field) {
+    const { x: posX, y: posY } = field.getBoundingClientRect()
+
+    if (
+      x >= posX &&
+      x < posX + field.offsetWidth - 1 &&
+      y >= posY - 1 &&
+      y <= posY + field.offsetHeight + 1
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
 export function savePositions(x: number, y: number, size: number, orientation: string) {
   const store = useFieldStore() // Use the store
 
-  if (orientation === 'h') {
-    for (let i = 0; i < size; i++) {
+  for (let i = 0; i < size; i++) {
+    if (orientation === 'h') {
       store.setPos(x + i, y)
-    }
-  } else {
-    for (let i = 0; i < size; i++) {
+    } else {
       store.setPos(x, y + i)
     }
   }
 }
 
-// TODO needs to be extended
+export function cleanUpStore(x: number, y: number, size: number, orientation: string) {
+  const store = useFieldStore() // Use the store
+
+  for (let i = 0; i < size; i++) {
+    if (orientation === 'h') {
+      store.removePos(x + i, y)
+    } else {
+      store.removePos(x, y + 1)
+    }
+  }
+}
+
 export function validatePos(x: number, y: number, size: number, orientation: string): boolean {
   const store = useFieldStore() // Use the store
 
@@ -33,10 +60,10 @@ export function validatePos(x: number, y: number, size: number, orientation: str
     return false
   }
 
-  if (orientation === 'h' && x + size - 1 > 10) {
+  if (orientation === 'h' && x + size > 11) {
     return false
   }
-  return !(orientation === 'v' && y + size - 1 > 10)
+  return !(orientation === 'v' && y + size > 11)
 }
 
 // ----------------------------------------------------------------
@@ -49,7 +76,11 @@ export function getElementBelowPosition(x: number, y: number): HTMLElement | nul
   const belowElement = document.elementFromPoint(x, y) // Get the element below
   topElement.style.visibility = '' // Show the top element again
 
-  return belowElement as HTMLElement
+  if (belowElement && belowElement.classList.contains('battlefield-cell')) {
+    return belowElement.getElementsByClassName('battlefield-cell-content')[0] as HTMLElement
+  } else {
+    return belowElement as HTMLElement
+  }
 }
 
 // ----------------------------------------------------------------

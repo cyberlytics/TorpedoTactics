@@ -4,8 +4,6 @@
     :id="id"
     class="ship"
     @mousedown="dragStart"
-    @mousemove="drag"
-    @mouseup="dragEnd"
     @click="handleClick"
     :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * 31 + 'px', height: '31px' }"
     :class="`${orientation !== 'h' ? 'vertical' : ''}`"
@@ -19,7 +17,9 @@ import {
   getPos,
   markElements,
   validatePos,
-  savePositions
+  savePositions,
+  cleanUpStore,
+  onField
 } from '@/utils/utils'
 
 export default {
@@ -83,7 +83,12 @@ export default {
       this.dragging = true
       this.clicked = false
 
-      // TODO on drag clean up store -- here or in drag
+      // add global listeners
+      window.addEventListener('mousemove', this.drag)
+      window.addEventListener('mouseup', this.dragEnd)
+
+      // on drag clean up store
+      cleanUpStore(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
     },
     drag(e: any) {
       // stop if dragging is false
@@ -96,8 +101,6 @@ export default {
 
       // set click flag
       this.clicked = true
-
-      // TODO on drag clean up store
     },
     dragEnd() {
       // set dragging flag
@@ -107,7 +110,13 @@ export default {
       this.pos = this.validatedPos ? { ...this.validPos } : { ...this.originPos }
 
       // save positions into store
-      savePositions(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
+      if (this.validatedPos) {
+        savePositions(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
+      }
+
+      // remove global listeners
+      window.removeEventListener('mousemove', this.drag)
+      window.removeEventListener('mouseup', this.dragEnd)
     },
     markElements(x: number, y: number) {
       // clean up previous elements
@@ -119,7 +128,6 @@ export default {
       // mark elements
       this.prevEle.forEach((ele) => {
         if (ele) {
-          console.log(this.validatedPos)
           ele.style.backgroundColor = this.validatedPos ? 'green' : 'red'
         }
       })
@@ -144,11 +152,10 @@ export default {
 
         // calculate valid position
         const { top, left } = ele.getBoundingClientRect()
-        const topMargin = 45
         const navHeight = 65
         this.validPos = {
           x: this.orientation === 'h' ? left + 1.5 : left + 2.5,
-          y: top - topMargin - navHeight + 1.5,
+          y: top - navHeight + 1.5,
           dataX: Number(ele.getAttribute('data-x')),
           dataY: Number(ele.getAttribute('data-y'))
         }
@@ -160,7 +167,7 @@ export default {
         this.validatedPos = false
       }
 
-      if (ele) {
+      if (ele && onField(x, y)) {
         // mark cells
         this.markElements(Number(ele.getAttribute('data-x')), Number(ele.getAttribute('data-y')))
       }

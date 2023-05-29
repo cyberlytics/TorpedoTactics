@@ -65,6 +65,7 @@ tr {
 .battlefield-table-wrapper {
   min-height: 340px;
   min-width: 340px;
+  display: inline-block;
   margin: 3em 2em;
 }
 
