@@ -1,5 +1,6 @@
 import { useFieldStore } from '@/stores/field'
 
+// check if passed mouse position is inside the game field
 export function onField(x: number, y: number) {
   const field = document.getElementById('game-field')
 
@@ -18,6 +19,7 @@ export function onField(x: number, y: number) {
   return false
 }
 
+// save position of ship in game field
 export function savePositions(x: number, y: number, size: number, orientation: string) {
   const store = useFieldStore() // Use the store
 
@@ -30,6 +32,7 @@ export function savePositions(x: number, y: number, size: number, orientation: s
   }
 }
 
+// remove position of ship inside the game field store
 export function cleanUpStore(x: number, y: number, size: number, orientation: string) {
   const store = useFieldStore() // Use the store
 
@@ -37,11 +40,12 @@ export function cleanUpStore(x: number, y: number, size: number, orientation: st
     if (orientation === 'h') {
       store.removePos(x + i, y)
     } else {
-      store.removePos(x, y + 1)
+      store.removePos(x, y + i)
     }
   }
 }
 
+// check if passed position is valid
 export function validatePos(x: number, y: number, size: number, orientation: string): boolean {
   const store = useFieldStore() // Use the store
 
