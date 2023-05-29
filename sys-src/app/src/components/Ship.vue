@@ -23,7 +23,7 @@ import {
 } from '@/utils/utils'
 
 export default {
-  props: ['id', 'size'],
+  props: ['id', 'size', 'x', 'y'],
   data() {
     return {
       dragging: false,
@@ -33,19 +33,19 @@ export default {
       orientation: 'h', // horizontal or vertical
       // current position
       pos: {
-        x: 500,
-        y: 0
+        x: this.x || 0,
+        y: this.y || 0
       },
       // need to be updated when dragging
       startPos: {
-        x: 0,
-        y: 0
+        x: this.x || 0,
+        y: this.y || 0
       },
 
       // need to reset position
       originPos: {
-        x: 500,
-        y: 108
+        x: this.x || 0,
+        y: this.y || 0
       },
 
       // need to set pos when drag ends
@@ -57,11 +57,24 @@ export default {
       }
     }
   },
+  watch: {
+    x(newX) {
+      this.updatePosition(newX, this.y)
+    },
+    y(newY) {
+      this.updatePosition(this.x, newY)
+    }
+  },
   mounted() {
     // set position state on mount
     this.pos = getPos(this.$refs['ship'] as HTMLDivElement)
   },
   methods: {
+    updatePosition(x, y) {
+      this.pos = { x, y }
+      this.startPos = { x, y }
+      this.originPos = { x, y }
+    },
     handleClick() {
       // this function handles the click event so that the ship can be dragged or rotated not both
       if (!this.dragging && !this.clicked) {
