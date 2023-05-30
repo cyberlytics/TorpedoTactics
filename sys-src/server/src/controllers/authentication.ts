@@ -2,7 +2,7 @@ import express from 'express';
 import { BadRequestError } from '../errors/bad-request-error';
 import { Password } from '../services/password';
 //import jwt from 'jsonwebtoken';
-import { User, createUser } from '../models/user';
+import { User, createUser, findUser } from '../models/user';
 
 export const login = async (req: express.Request, res: express.Response) => {
     try {
@@ -12,12 +12,7 @@ export const login = async (req: express.Request, res: express.Response) => {
             return;
         }
 
-        //const existingUser = await User.findOne({ where: { email } }); => find user in db
-        const existingUser: any = {
-          userid: "123456789",
-          username: "demoUser",
-          password: "demoPassword"
-        }
+        const user = await findUser(username );
 
         /*
          * This code will go through the same process no matter what the user or the password is,
@@ -26,12 +21,12 @@ export const login = async (req: express.Request, res: express.Response) => {
          */
 
         const passwordsMatch = await Password.compare(
-          existingUser ? existingUser.password_hash : 'supersecretpassword',
+          user ? user.password_hash : 'supersecretpassword',
           password
         )
 
-        if (!existingUser || !passwordsMatch) {
-          throw new BadRequestError('Invalid credentials', ['Change email or password.'])
+        if (!user || !passwordsMatch) {
+          throw new BadRequestError('Invalid credentials', ['Change username or password.'])
         }
 
         // Generate JWT
@@ -48,8 +43,7 @@ export const login = async (req: express.Request, res: express.Response) => {
         // }
 
         return res.status(200).send({
-          userID: existingUser.userid,
-          username: existingUser.username,
+          message: 'Successful signed in!'
         })
     }catch (err: any) {
         res.status(500).json({message: err.message});
@@ -65,15 +59,15 @@ export const register =async (req: express.Request, res: express.Response) => {
               return;
           }
 
-          if (await User.findOne({ where: { username } })) {
+          if (await User.findOne({ where: { username: username } })) {
               res.status(400).json({message: 'Username already exists'});
               return;
           }
 
-          let salt = await Password.toHash(password);
+          let password_hash = await Password.toHash(password);
 
-          const user = await createUser(username, salt);
-          if (user) {
+          const user = await createUser(username, password_hash);
+          if (!user) {
             res.status(400).json({message: 'Something went wrong'});
             return;
           }
