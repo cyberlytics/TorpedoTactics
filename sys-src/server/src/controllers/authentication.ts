@@ -2,6 +2,7 @@ import express from 'express';
 import { BadRequestError } from '../errors/bad-request-error';
 import { Password } from '../services/password';
 //import jwt from 'jsonwebtoken';
+import { User, createUser } from '../models/user';
 
 export const login = async (req: express.Request, res: express.Response) => {
     try {
@@ -11,7 +12,7 @@ export const login = async (req: express.Request, res: express.Response) => {
             return;
         }
 
-        // const existingUser = await User.findOne({ where: { email } }); => find user in db
+        //const existingUser = await User.findOne({ where: { email } }); => find user in db
         const existingUser: any = {
           userid: "123456789",
           username: "demoUser",
@@ -58,20 +59,24 @@ export const login = async (req: express.Request, res: express.Response) => {
 
 export const register =async (req: express.Request, res: express.Response) => {
     try {
-        const {username, password } = req.body;
-        if( !username || !password ) {
-            res.status(400).json({message: 'Missing username or password'});
+          const {username, password } = req.body;
+          if( !username || !password ) {
+              res.status(400).json({message: 'Missing username or password'});
+              return;
+          }
+
+          if (await User.findOne({ where: { username } })) {
+              res.status(400).json({message: 'Username already exists'});
+              return;
+          }
+
+          let salt = await Password.toHash(password);
+
+          const user = await createUser(username, salt);
+          if (user) {
+            res.status(400).json({message: 'Something went wrong'});
             return;
-        }
-
-          // find existing username in database
-
-          // throw bad request error if user exist
-
-          // hash password
-          //const passwordHash = await Password.toHash(password);
-
-          // create database transaction to save user
+          }
 
           // commit database transaction
 

@@ -2,12 +2,12 @@ import mongoose, { HydratedDocument, Schema} from "mongoose";
 
 interface IUser{
     username: string;
-    password: string;
+    salt: string;
 }
 
 const userSchema : Schema = new Schema<IUser>({
     username: {type: String, required: true, unique: true},
-    password: {type: String, required: true, unique: true},
+    salt: {type: String, required: true, unique: true},
 });
 
 
@@ -16,16 +16,24 @@ export const User = mongoose.model<IUser>('User',userSchema);
 
 /**
  * Create a User in Database
- * @param eingabeUsername 
- * @param password 
+ * @param username
+ * @param password
  * @returns Object of the create User
  */
-userSchema.statics.addUser = async function(eingabeUsername: string, password: string): Promise<HydratedDocument<IUser>> {
+userSchema.statics.addUser = async function(username: string, salt: string): Promise<HydratedDocument<IUser>> {
   const newUser : IUser = {
-    username: eingabeUsername,
-    password: password,
+    username: username,
+    salt: salt,
   }
   return await this.create(newUser);
+};
+
+export const createUser = async (username: string, salt: string): Promise<HydratedDocument<IUser>> => {
+  const doc = new User({
+    username: username,
+    salt: salt,
+  });
+  return await doc.save();
 };
 
 /**
