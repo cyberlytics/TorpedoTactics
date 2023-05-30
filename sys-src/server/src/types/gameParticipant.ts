@@ -1,9 +1,17 @@
 import { Battlefield, cellState } from "./battlefield";
 
+export enum GameState {
+    preparation = 0,
+    prepared,
+    ingame,
+    won,
+    lost,
+}
+
 export class GameParticipant {
     id: string;
     name: string;
-    ready: boolean;
+    state: GameState;
     battlefield: Battlefield;
     
     //default value for battlefield, with a fixed size it could be bigger
@@ -11,6 +19,6 @@ export class GameParticipant {
         this.id = id;
         this.name = name;
         this.battlefield = battlefield;
-        this.ready = false;
+        this.state = GameState.preparation;
     }
 }

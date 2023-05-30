@@ -1,10 +1,12 @@
 <template>
     <div class="enemies">
-        <h3>enemy: {{ enemy }}</h3>
+        <h3>enemy: {{ enemyName }}</h3>
     </div>
     <div class="table">
-        Current player: {{ publicGameMetadata?.currentPlayerName }}
+        <p v-if="myTurn">Du bist dran</p>
+        <p v-else>Es ist nicht dein Zug</p>
         <button @click="completePreparation()">Ready</button>
+        <button @click="shoot()">Shoot</button>
     </div>
     <div class="player">
         <h3>player: {{ userName }}</h3>
@@ -14,27 +16,49 @@
 
 <script setup lang="ts">
 //#region imports
-import { PublicGameMetadata } from '@/types/publicGameMetadata';
+import { Battlefield, cellState } from '@/types/battlefield';
 import { computed } from 'vue';
 //#endregion imports
 
+const battlefieldSize : number = 2;
+
 const props = defineProps({
     userName: String,
-    publicGameMetadata: PublicGameMetadata
+    enemyName: String,
+    myTurn: Boolean,
 });
 
 const enemy = computed(() => {
-    const enemy = props.publicGameMetadata?.players
-        .filter((playerName) => playerName != props.userName)[0];
-    
+    const enemy = props.publicGameMetadata?.playersData
+        .filter((player) => player.name != props.userName)[0].name;
+  
     return enemy;
 });
 
-const emit = defineEmits(['completePreparation']);
+const emit = defineEmits(['completePreparation','shoot']);
 
 
 function completePreparation() {
-  emit('completePreparation');
+  emit('completePreparation', getRandomBattlefied());
+}
+
+function shoot(){
+    emit('shoot', Math.floor(Math.random() * (battlefieldSize)), Math.floor(Math.random() * (battlefieldSize)))
+}
+
+
+//Helper Functions, remove later
+function getRandomBattlefied() : Battlefield{
+  const randomGrid : cellState[][] =  Array.from({ length: battlefieldSize }, () =>
+    Array.from({ length: battlefieldSize }, () => getRandomCellState())
+  );
+  return new Battlefield(randomGrid);
+}
+
+function getRandomCellState() : cellState {
+  const values = [cellState.empty, cellState.ship];
+  const randomIndex = Math.floor(Math.random() * values.length);
+  return values[randomIndex];
 }
 </script>
 

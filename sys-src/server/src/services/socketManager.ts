@@ -1,10 +1,11 @@
-import { PublicGameMetadata } from "../types/publicGameMetadata";
+//import { PublicGameMetadata } from "../types/publicGameMetadata";
 import { app } from "../app";
-import { GameParticipant } from "../types/gameParticipant";
+import { GameParticipant, GameState } from "../types/gameParticipant";
 import { PublicRoomData } from "../types/publicRoomData";
 import { SocketRoom } from "../types/socketRoom";
 import { Room } from "./room";
-import { Battlefield } from "src/types/battlefield";
+import { Battlefield } from "../types/battlefield";
+//import { read } from "fs";
 
 export class SocketManager {
   // logging
@@ -20,8 +21,9 @@ export class SocketManager {
 
   initialize() {
     this.io.on(
-      SocketRoom.connection, (socket: any) =>
-      this.connectUser(socket)
+      SocketRoom.connection, (socket: any) => {
+      this.connectUser(socket);
+      }
     );
 
     return this;
@@ -34,8 +36,8 @@ export class SocketManager {
       this.getLobbyData());
       
     socket.on(
-      SocketRoom.roomCreated, (userName: string) =>
-      this.createRoom(socket.id, userName)
+      SocketRoom.roomCreated, (roomId :string,userName: string) =>
+      this.createRoom(roomId, userName)
     );
 
     socket.on(
@@ -49,6 +51,11 @@ export class SocketManager {
     )
 
     socket.on(
+      SocketRoom.Shot, (roomId:string,userName: string, x: number, y:number) =>
+        this.Shot(roomId,userName, x, y)
+    );
+
+    socket.on(
       SocketRoom.disconnected, () =>
       this.disconnectUser(socket.id)
     );
@@ -59,6 +66,7 @@ export class SocketManager {
   }
  
   disconnectUser(userId: string) {
+    console.log("disconnect:" + userId);
     // find joined game
     let joinedRoom = this.rooms.filter(room => room.players.some((player: GameParticipant) => player.id == userId))[0];
     if (joinedRoom) {
@@ -71,10 +79,11 @@ export class SocketManager {
     }
   }
   
-  createRoom(userId: string, userName: string) {
+  createRoom(roomId: string, userName: string) {
     // create and save new room
     const newRoom: Room = new Room(
-      userId,
+       //unique string
+       roomId,
       `Room of ${userName}`
     );
     console.log("Neuen Raum mit Id: "+newRoom.id);
@@ -88,6 +97,7 @@ export class SocketManager {
     );
 
     this.logRooms();
+    console.log("Raum initialisieren wird abgeschlossen");
   }
 
   joinRoom(socket: any, roomId: string, userName: string) {
@@ -102,7 +112,7 @@ export class SocketManager {
         // add and subscribe player to room
         room.players.push(new GameParticipant(socket.id, userName));
         socket.join(room.id);
-  
+
         // start game if full
         if (room.isFull()) {
           console.log("Room is full")
@@ -114,10 +124,9 @@ export class SocketManager {
           SocketRoom.lobbyRoomsChanged,
           this.getLobbyData()
         );
-  
-        this.updateGamedata(room);
   }
 
+  //starts the game
   preparationCompleted(roomId:string,userName: string, battlefield : Battlefield){
     const room = this.rooms.find((room) => room.id == roomId);
         if (!room
@@ -127,19 +136,57 @@ export class SocketManager {
     
     //change player to ready
     const readyPlayer: GameParticipant = room.players.find((player: GameParticipant) => player.name == userName)!;
-    readyPlayer.battlefield = battlefield;
-    readyPlayer.ready = true;
-    console.log(readyPlayer.id + "is ready");
+    //constructor, otherwise received battlefield is recognized as object
+    readyPlayer.battlefield = new Battlefield(battlefield.grid);
+    readyPlayer.state = GameState.prepared
+    console.log(readyPlayer.id + "is ready, Battlefield"+ readyPlayer.battlefield.grid);
 
     //start game if both players ready
     if(room.allPlayersReady()){
       room.startGame();
-      this.io.to(room.id).emit(SocketRoom.gameStarted);
+
+      //send each player the start player and the data of the enemy
+      room.players.forEach((player : GameParticipant) =>{
+        const enemyPlayer : GameParticipant = room.players.find((enemyPlayer : GameParticipant) => enemyPlayer.name != player.name)!;
+        this.io.to(player.id).emit(SocketRoom.gameStarted, room.currentPlayer?.name, enemyPlayer.name, enemyPlayer.battlefield);
+      })
     }
 
     //update lobby rooms (??)
 
   }
+
+  //Receives a shot from a player
+  Shot(roomId:string,userName: string, x: number, y:number){
+    const room = this.rooms.find((room) => room.id == roomId);
+    if (!room
+      || !room.ingame || (room.currentPlayer?.name != userName)) {
+      return;
+    }
+  
+    //Update battlefield
+    const shotPlayer : GameParticipant= room.players.find(player => player.name != userName)!;
+    shotPlayer.battlefield.receiveShot(x,y);
+
+    //check if Game ended 
+    if(shotPlayer.battlefield.gameEnded()){
+      console.log(shotPlayer.name+ " lost");
+      shotPlayer.state = GameState.lost;
+      const wonPlayer : GameParticipant = room.players.find(player => player.name == userName)!;
+      wonPlayer.state = GameState.won;
+      console.log(wonPlayer.name + " won");
+    }
+
+    
+    //Send shot to player who was shot
+    console.log("Shot to "+shotPlayer.name+" x:"+x+" y:" +y +" Battlefield: "+ shotPlayer.battlefield.grid);
+    this.io.to(shotPlayer.id).emit(SocketRoom.receivedShot, x, y);
+
+    //shotPlayer's turn
+    room.currentPlayer = shotPlayer;
+  }
+
+  
 
   leaveRoom(room: Room, userId: string) {
     // leave joined games
@@ -149,31 +196,12 @@ export class SocketManager {
     if (room.players.length == 0) {
       this.rooms = this.rooms.filter(room => room.id != room.id);
     }
-    // update room members
-    else {
-      this.updateGamedata(room);
-    }
 
     // update lobby data
     this.io.emit(
       SocketRoom.lobbyRoomsChanged,
       this.getLobbyData()
     ); 
-  }
-
-  updateGamedata(room: Room) {
-    // get new game data
-    const gameMetadata = new PublicGameMetadata(
-      room.players.map((player) => player.name),
-      room.currentPlayer?.name,
-      room.players.map((player)=>player.battlefield)
-    )
-
-    // update room members with new game data
-    this.io.to(room.id).emit(
-      SocketRoom.gamedataPublished,
-      gameMetadata
-    );
   }
 
   getLobbyData() {

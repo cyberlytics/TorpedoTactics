@@ -1,4 +1,4 @@
-import { GameParticipant } from "src/types/gameParticipant";
+import { GameParticipant, GameState } from "../types/gameParticipant";
 import { getRandomElementFromArray } from "./helperFunctions";
 
 export class Room {
@@ -19,6 +19,7 @@ export class Room {
         this.maxPlayers = 2;
         this.currentPlayer = null;
     }
+    
 
     playerCount() {
         return this.players.length;
@@ -29,7 +30,7 @@ export class Room {
     }
 
     allPlayersReady() : boolean {
-        return (this.players.every(player => player.ready == true));
+        return (this.players.every(player => player.state == GameState.prepared));
     }
 
     startGame() {
