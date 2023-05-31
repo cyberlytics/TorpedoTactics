@@ -17,17 +17,6 @@ export interface IGame{
     gamehistory: number[][],
 }
 
-//methods for e Game Instance (Document)
-export interface IGameMethods {
-    changeState(newstate : Gamestate) : Promise<HydratedDocument<IGame, IGameMethods>>;
-}
-
-//methods on all Games 
-interface IGameModel extends Model<IGame, {}, IGameMethods>{
-    addGame (id1: Schema.Types.ObjectId, id2: Schema.Types.ObjectId): Promise<HydratedDocument<IGame, IGameMethods>>; 
-    getGames() :Promise<HydratedDocument<IGame, IGameMethods>[]>;
-}
-
 //schema Definition
 const gameSchema : Schema<IGame, IGameModel> = new Schema<IGame, IGameModel>({
     playerid1 : {type: Schema.Types.ObjectId, required: true, unique: true, ref: 'Player'},
@@ -38,6 +27,20 @@ const gameSchema : Schema<IGame, IGameModel> = new Schema<IGame, IGameModel>({
     ended: { type: Number},
     gamehistory: { type: [[Number]], required: true },
 });
+
+export const Game = mongoose.model<IGame, IGameModel>('Game', gameSchema);
+
+//methods for e Game Instance (Document)
+export interface IGameMethods {
+    changeState(newstate : Gamestate) : Promise<HydratedDocument<IGame, IGameMethods>>;
+}
+
+//methods on all Games
+interface IGameModel extends Model<IGame, {}, IGameMethods>{
+    addGame (id1: Schema.Types.ObjectId, id2: Schema.Types.ObjectId): Promise<HydratedDocument<IGame, IGameMethods>>;
+    getGames() :Promise<HydratedDocument<IGame, IGameMethods>[]>;
+}
+
 
 //static methods
 gameSchema.statics.addGame = async function(id1: Schema.Types.ObjectId, id2: Schema.Types.ObjectId): Promise<HydratedDocument<IGame, IGameMethods>> {
@@ -57,7 +60,7 @@ gameSchema.statics.getGames = async function():Promise<HydratedDocument<IGame, I
 
 
 gameSchema.statics.getGame= async function (gameId: Schema.Types.ObjectId):Promise<HydratedDocument<IGame, IGameMethods>[]> {
-    return await this.find(gameId);    
+    return await this.find(gameId);
 }
 
 
@@ -70,7 +73,7 @@ gameSchema.statics.getGame= async function (gameId: Schema.Types.ObjectId):Promi
 //instance methods
 gameSchema.methods.changeState = async function(newstate:Gamestate):Promise<HydratedDocument<IGame, IGameMethods>>{
     this.state = newstate;
-    return await this.save(); 
+    return await this.save();
 }
 
 /*
@@ -79,6 +82,6 @@ gameSchema.methods.changeState = async function(newstate:Gamestate):Promise<Hydr
         - addGameMove  (playingfield[])
 */
 
-export const Game = mongoose.model<IGame, IGameModel>('Game', gameSchema);
+
 
 

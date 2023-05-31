@@ -2,7 +2,8 @@ import express from 'express';
 import { BadRequestError } from '../errors/bad-request-error';
 import { Password } from '../services/password';
 //import jwt from 'jsonwebtoken';
-import { User, createUser, findUser } from '../models/user';
+import { User, IUser, findUser } from '../models/user';
+import { HydratedDocument } from 'mongoose';
 
 export const login = async (req: express.Request, res: express.Response) => {
     try {
@@ -66,7 +67,7 @@ export const register =async (req: express.Request, res: express.Response) => {
 
           let password_hash = await Password.toHash(password);
 
-          const user = await createUser(username, password_hash);
+          const user : HydratedDocument<IUser>[] =  await User.create(username, password_hash);
           if (!user) {
             res.status(400).json({message: 'Something went wrong'});
             return;

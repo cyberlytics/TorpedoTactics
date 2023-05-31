@@ -1,18 +1,25 @@
-import mongoose, { HydratedDocument, Schema} from "mongoose";
+import mongoose, { HydratedDocument, Model, Schema} from "mongoose";
 
-interface IUser{
+export interface IUser{
     username: string;
     password_hash: string;
 }
 
-const userSchema : Schema = new Schema<IUser>({
+export interface IUserMethods {
+}
+
+interface IUserModel extends Model<IUser, {}, IUserMethods>{
+  createUser (username: string, password_hash: string): Promise<HydratedDocument<IUser>>;
+  getUsers() :Promise<HydratedDocument<IUser>[]>;
+  getOneUser(userid: Schema.Types.ObjectId): Promise<HydratedDocument<IUser>>;
+}
+
+const userSchema : Schema<IUser, IUserModel> = new Schema<IUser, IUserModel>({
     username: {type: String, required: true, unique: true},
     password_hash: {type: String, required: true, unique: true},
 });
 
-
-export const User = mongoose.model<IUser>('User',userSchema);
-
+export const User = mongoose.model<IUser, IUserModel>('User',userSchema);
 
 /**
  * Create a User in Database
@@ -20,28 +27,12 @@ export const User = mongoose.model<IUser>('User',userSchema);
  * @param password_hash
  * @returns Object of the create User
  */
-userSchema.statics.addUser = async function(username: string, password_hash: string): Promise<HydratedDocument<IUser>> {
+userSchema.statics.createUser = async function(username: string, password_hash: string): Promise<HydratedDocument<IUser>> {
   const newUser : IUser = {
     username: username,
     password_hash: password_hash,
   }
   return await this.create(newUser);
-};
-
-export const createUser = async (username: string, password_hash: string): Promise<HydratedDocument<IUser>> => {
-  const doc = new User({
-    username: username,
-    password_hash: password_hash,
-  });
-  return await doc.save();
-};
-
-export const findUser = async (username: string): Promise<HydratedDocument<IUser>> => {
-  let user = await User.findOne({username: username});
-  if (!user) {
-    throw new Error("User not found");
-  }
-  return user;
 };
 
 /**
