@@ -29,7 +29,7 @@ export const User = mongoose.model<IUser, IUserModel>('User',userSchema);
  * @param password_hash
  * @returns Object of the create User
  */
-userSchema.statics.createUser = async function(username: string, password_hash: string): Promise<HydratedDocument<IUser, IUserModel>> {
+userSchema.statics.createUser = async function(username: string, password_hash: string): Promise<HydratedDocument<IUser>> {
   const newUser : IUser = {
     username: username,
     password_hash: password_hash,
@@ -41,7 +41,7 @@ userSchema.statics.createUser = async function(username: string, password_hash: 
  * Get all users from Database
  * @returns a list of all User
  */
-userSchema.statics.getAllUsers = async function():Promise<HydratedDocument<IUser, IUserModel>[]> {
+userSchema.statics.getAllUsers = async function():Promise<HydratedDocument<IUser>[]> {
    return await this.find();
 };
 
@@ -50,7 +50,7 @@ Get one user from Database
 @param gameId
 @returns User or null
 */
-userSchema.statics.getOneUser = async function (userid: Schema.Types.ObjectId):Promise<HydratedDocument<IUser, IUserModel> | null>  {
+userSchema.statics.getOneUser = async function (userid: Schema.Types.ObjectId):Promise<HydratedDocument<IUser> | null>  {
    return await this.findById(userid);
 }
 
@@ -59,7 +59,7 @@ userSchema.statics.getOneUser = async function (userid: Schema.Types.ObjectId):P
  * @param username
  * @returns User or null
  */
-userSchema.statics.getUserByName = async function (username : string) : Promise<HydratedDocument<IUser, IUserModel> | null> {
+userSchema.statics.getUserByName = async function (username : string) : Promise<HydratedDocument<IUser> | null> {
   return await this.findOne({username: username})
 }
 
