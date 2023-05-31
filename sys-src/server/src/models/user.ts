@@ -5,14 +5,15 @@ export interface IUser{
     password_hash: string;
 }
 
-export interface IUserMethods {
+interface IUserMethods {
 }
 
-interface IUserModel extends Model<IUser, {}, IUserMethods>{
-  createUser (username: string, password_hash: string): Promise<HydratedDocument<IUser>>;
-  getUsers() :Promise<HydratedDocument<IUser>[]>;
-  getOneUser(userid: Schema.Types.ObjectId): Promise<HydratedDocument<IUser>>;
-  addUser(): Promise<HydratedDocument<IUser, IUserMethods>>;
+export interface IUserModel extends Model<IUser, {}, IUserMethods>{
+  createUser (username: string, password_hash: string): Promise<HydratedDocument<IUser, IUserModel>>;
+  getUsers() :Promise<HydratedDocument<IUser, IUserModel>[]>;
+  getOneUser(userid: Schema.Types.ObjectId): Promise<HydratedDocument<IUser, IUserModel>>;
+  addUser(): Promise<HydratedDocument<IUser, IUserModel>>;
+  getUserByName(username: string): Promise<HydratedDocument<IUser, IUserModel>>;
 }
 
 const userSchema : Schema<IUser, IUserModel> = new Schema<IUser, IUserModel>({
@@ -28,7 +29,7 @@ export const User = mongoose.model<IUser, IUserModel>('User',userSchema);
  * @param password_hash
  * @returns Object of the create User
  */
-userSchema.statics.createUser = async function(username: string, password_hash: string): Promise<HydratedDocument<IUser>> {
+userSchema.statics.createUser = async function(username: string, password_hash: string): Promise<HydratedDocument<IUser, IUserModel>> {
   const newUser : IUser = {
     username: username,
     password_hash: password_hash,
@@ -40,7 +41,7 @@ userSchema.statics.createUser = async function(username: string, password_hash: 
  * Get all users from Database
  * @returns a list of all User
  */
-userSchema.statics.getUsers = async function():Promise<HydratedDocument<IUser, IUserMethods>[]> {
+userSchema.statics.getAllUsers = async function():Promise<HydratedDocument<IUser, IUserModel>[]> {
    return await this.find();
 };
 
@@ -49,7 +50,7 @@ Get one user from Database
 @param gameId
 @returns User or null
 */
-userSchema.statics.getOneUser = async function (userid: Schema.Types.ObjectId):Promise<HydratedDocument<IUser, IUserMethods> | null>  {
+userSchema.statics.getOneUser = async function (userid: Schema.Types.ObjectId):Promise<HydratedDocument<IUser, IUserModel> | null>  {
    return await this.findById(userid);
 }
 
@@ -58,7 +59,7 @@ userSchema.statics.getOneUser = async function (userid: Schema.Types.ObjectId):P
  * @param username
  * @returns User or null
  */
-userSchema.statics.getUserByName = async function (username : string) : Promise<HydratedDocument<IUser,IUserMethods> | null> {
+userSchema.statics.getUserByName = async function (username : string) : Promise<HydratedDocument<IUser, IUserModel> | null> {
   return await this.findOne({username: username})
 }
 
