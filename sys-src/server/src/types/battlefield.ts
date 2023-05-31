@@ -16,7 +16,15 @@ export class Battlefield{
         this.grid = grid;
         this.length = grid.length;
         this.width = grid[0].length;
-         this.amountShips = this.getamountShips();
+         this.amountShips = this.getamountCellState(cellState.ship);
+    }
+
+    getCell(x: number, y: number) : cellState {
+        return this.grid[y][x];
+    }
+
+    setCell(x: number, y: number, newCell: cellState) : void {
+        this.grid[y][x] = newCell;
     }
 
     receiveShot(x: number, y: number){
@@ -32,16 +40,16 @@ export class Battlefield{
         }
     }
 
-    getamountShips() : number{
-        let amountShips : number = 0;
+    getamountCellState(cellstate : cellState) : number{
+        let amountCellState : number = 0;
         for(let i = 0; i < this.length; i++){
             for(let u = 0; u < this.width; u++){
-                if(this.grid[i][u] == cellState.ship){
-                    amountShips++;
+                if(this.grid[i][u] == cellstate){
+                    amountCellState++;
                 }
             }
         }
-        return amountShips;
+        return amountCellState;
     }
 
     gameEnded() : boolean{

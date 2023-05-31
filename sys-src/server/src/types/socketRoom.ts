@@ -4,11 +4,12 @@ export enum SocketRoom {
 
     roomCreated = 'roomCreated',
     roomJoined = 'roomJoined',
-    preparationStarted = "preparationStarted",
+    preparationStarted = 'preparationStarted',
     preparationCompleted = "preparationCompleted",
     gameStarted = 'gameStarted',
 
     Shot = "Shot",
+    responsetoShot = "responsetoShot",
     receivedShot = "receivedShot",
 
     lobbyRoomsChanged = 'lobbyRoomsChanged',

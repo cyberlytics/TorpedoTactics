@@ -148,13 +148,12 @@ export class SocketManager {
       //send each player the start player and the data of the enemy
       room.players.forEach((player : GameParticipant) =>{
         const enemyPlayer : GameParticipant = room.players.find((enemyPlayer : GameParticipant) => enemyPlayer.name != player.name)!;
-        this.io.to(player.id).emit(SocketRoom.gameStarted, room.currentPlayer?.name, enemyPlayer.name, enemyPlayer.battlefield);
+        this.io.to(player.id).emit(SocketRoom.gameStarted, room.currentPlayer?.name, enemyPlayer.name);
       })
     }
-
     //update lobby rooms (??)
-
   }
+
 
   //Receives a shot from a player
   Shot(roomId:string,userName: string, x: number, y:number){
@@ -164,24 +163,26 @@ export class SocketManager {
       return;
     }
   
-    //Update battlefield
+    const wonPlayer : GameParticipant = room.players.find(player => player.name == userName)!;
     const shotPlayer : GameParticipant= room.players.find(player => player.name != userName)!;
+    //Update battlefield
     shotPlayer.battlefield.receiveShot(x,y);
 
     //check if Game ended 
     if(shotPlayer.battlefield.gameEnded()){
       console.log(shotPlayer.name+ " lost");
       shotPlayer.state = GameState.lost;
-      const wonPlayer : GameParticipant = room.players.find(player => player.name == userName)!;
       wonPlayer.state = GameState.won;
       console.log(wonPlayer.name + " won");
     }
-
     
     //Send shot to player who was shot
     console.log("Shot to "+shotPlayer.name+" x:"+x+" y:" +y +" Battlefield: "+ shotPlayer.battlefield.grid);
     this.io.to(shotPlayer.id).emit(SocketRoom.receivedShot, x, y);
 
+    //Send response to player who shot
+    console.log("Response to " + wonPlayer.name + " x:"+x+" y:"+y+" Cell State: "+shotPlayer.battlefield.getCell(x,y));
+    this.io.to(wonPlayer.id).emit(SocketRoom.responsetoShot, x, y, shotPlayer.battlefield.getCell(x,y));
     //shotPlayer's turn
     room.currentPlayer = shotPlayer;
   }

@@ -16,24 +16,27 @@
 
 <script setup lang="ts">
 //#region imports
-import { Battlefield, cellState } from '@/types/battlefield';
+import { Battlefield, cellState, createGrid } from '@/types/battlefield';
 import { computed } from 'vue';
 //#endregion imports
 
-const battlefieldSize : number = 2;
+
 
 const props = defineProps({
     userName: String,
     enemyName: String,
     myTurn: Boolean,
+    battlefieldSize: Number,
+    amountShips: Number,
 });
 
+/* Delete later
 const enemy = computed(() => {
     const enemy = props.publicGameMetadata?.playersData
         .filter((player) => player.name != props.userName)[0].name;
   
     return enemy;
-});
+});*/
 
 const emit = defineEmits(['completePreparation','shoot']);
 
@@ -43,23 +46,21 @@ function completePreparation() {
 }
 
 function shoot(){
-    emit('shoot', Math.floor(Math.random() * (battlefieldSize)), Math.floor(Math.random() * (battlefieldSize)))
+    emit('shoot', Math.floor(Math.random() * (props.battlefieldSize!)), Math.floor(Math.random() * (props.battlefieldSize!)))
 }
 
 
 //Helper Functions, remove later
 function getRandomBattlefied() : Battlefield{
-  const randomGrid : cellState[][] =  Array.from({ length: battlefieldSize }, () =>
-    Array.from({ length: battlefieldSize }, () => getRandomCellState())
-  );
-  return new Battlefield(randomGrid);
+  return new Battlefield(createGrid(props.battlefieldSize!, props.amountShips!));
 }
 
+/* Not needed, delete later
 function getRandomCellState() : cellState {
   const values = [cellState.empty, cellState.ship];
   const randomIndex = Math.floor(Math.random() * values.length);
   return values[randomIndex];
-}
+}*/
 </script>
 
 <style>
