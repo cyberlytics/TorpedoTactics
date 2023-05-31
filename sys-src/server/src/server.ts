@@ -1,25 +1,24 @@
 import { app } from './app'
 import { SocketManager } from './services/socketManager';
 import mongoose, {HydratedDocument} from 'mongoose';
-import { IGame,Game, Gamestate, IGameMethods } from './models/game';
+import { IUser,User, IUserMethods } from './models/user';
 //import { IPlayer,Player } from './models/player'
 
 const start = async () => {
   try{
-  await mongoose.connect("mongodb+srv://feillukas:"+encodeURIComponent("pEj?VQK>w2*2Uk4UAk5MS<9mDiT7fYyZ")+"@wae.6bsejdu.mongodb.net/?retryWrites=true&w=majority")
-    //"mongodb+srv://gruppegruen:TorpedoTactics@bcn.xuho2ki.mongodb.net/?retryWrites=true&w=majority")
+  //await mongoose.connect("mongodb+srv://feillukas:"+encodeURIComponent("pEj?VQK>w2*2Uk4UAk5MS<9mDiT7fYyZ")+"@wae.6bsejdu.mongodb.net/?retryWrites=true&w=majority")
+    await mongoose.connect("mongodb+srv://gruppegruen:TorpedoTactics@bcn.xuho2ki.mongodb.net/?retryWrites=true&w=majority")
   .then(async() => {
     console.log('Verbindung zur MongoDB hergestellt');
 
   //Example call static method
-   const games : HydratedDocument<IGame, IGameMethods>[] = await Game.getGames();
-
+   const users : HydratedDocument<IUser, IUserMethods>[] = await User.getUsers();
+   console.log(users);
    //Example call instance method with promise processing
-   await games[0].changeState(Gamestate.aborted).then((changedGame: HydratedDocument<IGame, IGameMethods>) =>{
-    console.log(changedGame);
-   }).catch((error)=>{
-    console.error(error);
-   })
+   let user : HydratedDocument<IUser, IUserMethods> | null = await User.getUserByName('test');
+   //Only the user
+   let realUser = user!.toObject() as IUser;
+   console.log(realUser);
   })
 
     // initialize SocketManager
