@@ -6,7 +6,6 @@ import { IUser,User, IUserMethods } from './models/user';
 
 const start = async () => {
   try{
-  //await mongoose.connect("mongodb+srv://feillukas:"+encodeURIComponent("pEj?VQK>w2*2Uk4UAk5MS<9mDiT7fYyZ")+"@wae.6bsejdu.mongodb.net/?retryWrites=true&w=majority")
     await mongoose.connect("mongodb+srv://gruppegruen:TorpedoTactics@bcn.xuho2ki.mongodb.net/?retryWrites=true&w=majority")
   .then(async() => {
     console.log('Verbindung zur MongoDB hergestellt');
