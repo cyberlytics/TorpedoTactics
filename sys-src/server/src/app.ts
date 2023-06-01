@@ -7,7 +7,7 @@ import router from './routes/router';
 import { NotFoundError } from './errors/not-found-error';
 
 // middlewares
-import { errorHandler } from './middlewares/error-handler'
+import { errorHandler } from './middlewares/error-handler';
 
 // create server
 var app = express();
@@ -32,7 +32,7 @@ app.use(
 /**
  * The routes of the app are defined in the routes/router.ts file
  */
-app.use('/', router())
+app.use('/', router());
 app.all('*', async () => {
   throw new NotFoundError();
 });
