@@ -1,12 +1,19 @@
 export enum SocketRoom {
-    connection = 'connection',
-    disconnected = 'disconnect',
+  connection = 'connection',
+  disconnected = 'disconnect',
 
-    roomCreated = 'roomCreated',
-    roomJoined = 'roomJoined',
-    gameStarted = "gameStarted",
+  roomCreated = 'roomCreated',
+  roomJoined = 'roomJoined',
+  preparationStarted = 'preparationStarted',
+  preparationCompleted = 'preparationCompleted',
+  gameStarted = 'gameStarted',
 
-    lobbyRoomsChanged = 'lobbyRoomsChanged',
-    
-    gamedataPublished = 'gamedataPublished',
+  Shot = 'Shot',
+  responsetoShot = 'responsetoShot',
+  receivedShot = 'receivedShot',
+
+  lobbyRoomsChanged = 'lobbyRoomsChanged',
+
+  clientError = 'clientError',
+  errorThrown = 'errorThrown',
 }

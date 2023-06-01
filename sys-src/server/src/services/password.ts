@@ -20,7 +20,7 @@ export class Password {
    */
   static async compare(
     storedPassword: string, // hashed password
-    suppliedPassword: string // hashed password
+    suppliedPassword: string, // hashed password
   ): Promise<boolean> {
     return bcrypt.compare(suppliedPassword, storedPassword);
   }

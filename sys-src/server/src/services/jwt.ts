@@ -13,7 +13,7 @@ export class JWT {
    */
   static async createToken(
     payload: object,
-    expiresIn?: string | number
+    expiresIn?: string | number,
   ): Promise<string | undefined> {
     return new Promise((resolve, reject) => {
       jwt.sign(
@@ -24,12 +24,10 @@ export class JWT {
         },
         (err: Error | null, encoded: string | undefined) => {
           if (err) {
-            reject(
-              new InternalServerError('Something went wrong with the JWT-Token')
-            );
+            reject(new InternalServerError('Something went wrong with the JWT-Token'));
           }
           resolve(encoded);
-        }
+        },
       );
     });
   }
@@ -44,19 +42,11 @@ export class JWT {
     return new Promise((resolve, reject) => {
       jwt.verify(token, process.env.JWT_KEY!, function (err, decode: any) {
         if (err?.name === 'TokenExpiredError') {
-          reject(
-            new BadRequestError('Token has expired!', [
-              'Please restart the process.',
-            ])
-          );
+          reject(new BadRequestError('Token has expired!', ['Please restart the process.']));
         }
 
         if (err?.name === 'JsonWebTokenError') {
-          reject(
-            new BadRequestError('That JWT is malformed!', [
-              'Please restart the process.',
-            ])
-          );
+          reject(new BadRequestError('That JWT is malformed!', ['Please restart the process.']));
         }
 
         resolve(decode);

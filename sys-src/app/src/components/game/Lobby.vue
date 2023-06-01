@@ -1,16 +1,17 @@
 <template>
   <div>
     <h3>{{ userName }}</h3>
-    <hr><br>
+    <hr />
+    <br />
 
     <h2>Create</h2>
-    <br>
+    <br />
     <button @click="createRoom()">Create room</button>
 
-    <br><br>
+    <br /><br />
     <!-- <hr> -->
-    <br>
-    
+    <br />
+
     <h2>Open Rooms</h2>
     <ul>
       <li v-for="room in props.rooms" :key="room.id">
@@ -20,7 +21,7 @@
     </ul>
   </div>
 </template>
-  
+
 <script setup lang="ts">
 //#region imports
 import type { PublicRoomData } from '@/types/publicRoomData';
@@ -28,10 +29,9 @@ import type { PublicRoomData } from '@/types/publicRoomData';
 
 const props = defineProps({
   rooms: Array<PublicRoomData>,
-  userName: String
+  userName: String,
 });
 const emit = defineEmits(['createRoom', 'joinRoom']);
-
 
 function createRoom() {
   emit('createRoom');

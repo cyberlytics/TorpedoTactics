@@ -5,39 +5,41 @@ import { BCRYPT_MAX_LENGTH, BCRYPT_MIN_LENGTH, passwordRegex } from '../config/a
 import { body } from 'express-validator';
 
 export default (router: express.Router) => {
-    /**
-     * Register a User.
-     * * @route POST /api/auth/signup
-     */
-    router.post('/api/auth/signup',
+  /**
+   * Register a User.
+   * * @route POST /api/auth/signup
+   */
+  router.post(
+    '/api/auth/signup',
     [
       body('password')
         .trim()
         .isLength({ min: BCRYPT_MIN_LENGTH, max: BCRYPT_MAX_LENGTH })
         .matches(passwordRegex)
         .withMessage('Password must be between 8 and 64 characters long.'),
-      body(['username'])
-        .notEmpty()
-        .withMessage('Username must be atleast one character long.'),
+      body(['username']).notEmpty().withMessage('Username must be atleast one character long.'),
     ],
     validateRequest,
-    register);
+    register,
+  );
 
-    /**
-     * Login with a User.
-     * * @route POST /api/auth/signin
-     */
-    router.post('/api/auth/signin',
+  /**
+   * Login with a User.
+   * * @route POST /api/auth/signin
+   */
+  router.post(
+    '/api/auth/signin',
     [
       //body('email').isEmail().withMessage('Email must be valid'),
-      body('password').trim().notEmpty().withMessage('You must supply a password')
+      body('password').trim().notEmpty().withMessage('You must supply a password'),
     ],
     validateRequest,
-    login);
+    login,
+  );
 
-    /**
-     * Clears the request session.
-     * * @route POST /api/auth/signout
-     */
-    router.post('/api/auth/signout', signout);
+  /**
+   * Clears the request session.
+   * * @route POST /api/auth/signout
+   */
+  router.post('/api/auth/signout', signout);
 };

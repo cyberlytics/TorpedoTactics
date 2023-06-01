@@ -1,29 +1,25 @@
 <script setup lang="ts">
-import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
-import axios from "axios"
-import {ref, onMounted} from "vue"
+import { RouterLink, RouterView } from 'vue-router';
+import HelloWorld from './components/HelloWorld.vue';
+import axios from 'axios';
+import { ref, onMounted } from 'vue';
 
+const users = ref([]);
 
-const users = ref([])
+onMounted(() => {
+  const fetch = async () => {
+    const res = await axios.get('http://localhost:3000/api/test');
+    const s = res.data.user;
+    users.value.push(...s);
+    console.log(users);
+  };
 
-onMounted(()=>{
-  const fetch = async ()=>{
-    const res = await axios.get("http://localhost:3000/api/test")
-    const s =  res.data.user
-  users.value.push(...s)
-    console.log(users)
-
-  }
-
-  (fetch())
-})
-
+  fetch();
+});
 </script>
 
 <template>
-  <header>
-  </header>
+  <header></header>
 
   <RouterView />
 </template>
