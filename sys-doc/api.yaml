@@ -1,10 +1,10 @@
-openapi: 3.0.0
+openapi: '3.0.2'
 servers:
   # Added by API Auto Mocking Plugin
   - description: SwaggerHub API Auto Mocking
     url: https://virtserver.swaggerhub.com/ALEXHAM2000/TorpedoTactics/1.0.0
 info:
-  version: "1.0.0"
+  version: "1.1.0"
   title: TorpedoTactics
   description: API for the online game
 basepath: /api
@@ -94,6 +94,47 @@ paths:
                   error:
                     type: string
                     example: Invalid user data.
+
+  /auth/signout:
+    post:
+      summary: user sign out
+      description: Logs a user out.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: successfully logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully logged out.
+        '401':
+          description: Invalid sign out.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Invalid user data.
+
             
   /stats:
     get:

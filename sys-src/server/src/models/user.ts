@@ -1,29 +1,38 @@
-import mongoose, { HydratedDocument, Schema} from "mongoose";
+import mongoose, { HydratedDocument, Model, Schema} from "mongoose";
 
-interface IUser{
+export interface IUser{
     username: string;
-    password: string;
+    password_hash: string;
 }
 
-const userSchema : Schema = new Schema<IUser>({
+interface IUserMethods {
+}
+
+export interface IUserModel extends Model<IUser, {}, IUserMethods>{
+  createUser (username: string, password_hash: string): Promise<HydratedDocument<IUser, IUserModel>>;
+  getUsers() :Promise<HydratedDocument<IUser, IUserModel>[]>;
+  getOneUser(userid: Schema.Types.ObjectId): Promise<HydratedDocument<IUser, IUserModel>>;
+  addUser(): Promise<HydratedDocument<IUser, IUserModel>>;
+  getUserByName(username: string): Promise<HydratedDocument<IUser, IUserModel>>;
+}
+
+const userSchema : Schema<IUser, IUserModel> = new Schema<IUser, IUserModel>({
     username: {type: String, required: true, unique: true},
-    password: {type: String, required: true, unique: true},
+    password_hash: {type: String, required: true, unique: true},
 });
 
-
-export const User = mongoose.model<IUser>('User',userSchema);
-
+export const User = mongoose.model<IUser, IUserModel>('User',userSchema);
 
 /**
  * Create a User in Database
- * @param eingabeUsername 
- * @param password 
+ * @param username
+ * @param password_hash
  * @returns Object of the create User
  */
-userSchema.statics.addUser = async function(eingabeUsername: string, password: string): Promise<HydratedDocument<IUser>> {
+userSchema.statics.createUser = async function(username: string, password_hash: string): Promise<HydratedDocument<IUser>> {
   const newUser : IUser = {
-    username: eingabeUsername,
-    password: password,
+    username: username,
+    password_hash: password_hash,
   }
   return await this.create(newUser);
 };
@@ -32,15 +41,25 @@ userSchema.statics.addUser = async function(eingabeUsername: string, password: s
  * Get all users from Database
  * @returns a list of all User
  */
-userSchema.statics.getUsers = async function():Promise<HydratedDocument<IUser>[]> {
+userSchema.statics.getAllUsers = async function():Promise<HydratedDocument<IUser>[]> {
    return await this.find();
 };
 
 /**
 Get one user from Database
 @param gameId
-@returns A Document of the User
+@returns User or null
 */
-userSchema.statics.getOneUser = async function (userid: Schema.Types.ObjectId):Promise<HydratedDocument<IUser>> {
+userSchema.statics.getOneUser = async function (userid: Schema.Types.ObjectId):Promise<HydratedDocument<IUser> | null>  {
    return await this.findById(userid);
 }
+
+/**
+ * Find a User by username
+ * @param username
+ * @returns User or null
+ */
+userSchema.statics.getUserByName = async function (username : string) : Promise<HydratedDocument<IUser> | null> {
+  return await this.findOne({username: username})
+}
+
