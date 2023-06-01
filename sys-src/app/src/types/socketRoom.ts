@@ -16,4 +16,6 @@ export enum SocketRoom {
     
     gamedataPublished = 'gamedataPublished',
 
+    clientError='clientError',
+    errorThrown='errorThrown',
 }

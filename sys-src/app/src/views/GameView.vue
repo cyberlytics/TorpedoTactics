@@ -20,6 +20,7 @@ import Game from '../components/game/Game.vue';
 import type { PublicRoomData } from '@/types/publicRoomData';
 import { SocketRoom } from '@/types/socketRoom';
 import { Battlefield, createEmptyGrid, cellState} from '@/types/battlefield';
+import {socketError} from '@/types/socketError'
 //#endregion imports
 
 const url = 'http://localhost:3000';
@@ -101,7 +102,16 @@ socket.on(SocketRoom.responsetoShot, (x: number, y:number, changedCell:cellState
       socket.disconnect();
     } 
     myTurn.value =false;
+  } else {
+    console.error("Received Response, but it's not my turn");
+    socket.emit(SocketRoom.clientError, currentRoomId.value, userName.value, socketError.gameSequenceError);
   }
+})
+
+//received error from server
+socket.on(SocketRoom.errorThrown, (thrownError : socketError) =>{
+  console.error("Error from server received: "+thrownError+". Disconnect");
+  //socket.disconnect();
 })
 
 
@@ -149,7 +159,10 @@ function shoot(x:number, y:number){
   if(myTurn.value){
     console.log("Shot at x: "+x+ " y: "+y);
     socket.emit(SocketRoom.Shot,currentRoomId.value,userName.value, x, y);
-  } 
+  } else {
+    console.error("Tried to shot, but it's not my turn");
+    socket.emit(SocketRoom.clientError, currentRoomId.value, userName.value, socketError.gameSequenceError);
+  }
 }
 
 //#endregion publish

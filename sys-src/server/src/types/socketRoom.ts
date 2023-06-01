@@ -13,6 +13,7 @@ export enum SocketRoom {
     receivedShot = "receivedShot",
 
     lobbyRoomsChanged = 'lobbyRoomsChanged',
-    
-   
+
+    clientError='clientError',
+    errorThrown='errorThrown',
 }

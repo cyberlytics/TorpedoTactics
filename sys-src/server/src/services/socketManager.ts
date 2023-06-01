@@ -5,6 +5,7 @@ import { PublicRoomData } from "../types/publicRoomData";
 import { SocketRoom } from "../types/socketRoom";
 import { Room } from "./room";
 import { Battlefield } from "../types/battlefield";
+import { socketError } from "../types/socketError"
 //import { read } from "fs";
 
 export class SocketManager {
@@ -60,6 +61,10 @@ export class SocketManager {
       this.disconnectUser(socket.id)
     );
 
+    socket.on(
+      SocketRoom.clientError, (roomId:string, userName:string, Error : socketError) =>
+      this.clientError(roomId,userName, Error)
+    );
     if (this.userConnectionLog) {
       console.log(`Client ${socket.id} connected. (${this.io.engine.clientsCount})`);
     }
@@ -151,7 +156,6 @@ export class SocketManager {
         this.io.to(player.id).emit(SocketRoom.gameStarted, room.currentPlayer?.name, enemyPlayer.name);
       })
     }
-    //update lobby rooms (??)
   }
 
 
@@ -160,10 +164,17 @@ export class SocketManager {
     const room = this.rooms.find((room) => room.id == roomId);
     if (!room
       || !room.ingame || (room.currentPlayer?.name != userName)) {
+      
+      //Error Handling
+      if(!room?.ingame){
+        this.io.emit(SocketRoom.errorThrown, socketError.gameNotStartedError);
+      } else if (room.currentPlayer?.name != userName){
+        this.io.emit(SocketRoom.errorThrown, socketError.gameSequenceError);
+      }
       return;
     }
   
-    const wonPlayer : GameParticipant = room.players.find(player => player.name == userName)!;
+    const shooterPlayer : GameParticipant = room.players.find(player => player.name == userName)!;
     const shotPlayer : GameParticipant= room.players.find(player => player.name != userName)!;
     //Update battlefield
     shotPlayer.battlefield.receiveShot(x,y);
@@ -172,8 +183,8 @@ export class SocketManager {
     if(shotPlayer.battlefield.gameEnded()){
       console.log(shotPlayer.name+ " lost");
       shotPlayer.state = GameState.lost;
-      wonPlayer.state = GameState.won;
-      console.log(wonPlayer.name + " won");
+      shooterPlayer.state = GameState.won;
+      console.log(shooterPlayer.name + " won");
     }
     
     //Send shot to player who was shot
@@ -181,8 +192,8 @@ export class SocketManager {
     this.io.to(shotPlayer.id).emit(SocketRoom.receivedShot, x, y);
 
     //Send response to player who shot
-    console.log("Response to " + wonPlayer.name + " x:"+x+" y:"+y+" Cell State: "+shotPlayer.battlefield.getCell(x,y));
-    this.io.to(wonPlayer.id).emit(SocketRoom.responsetoShot, x, y, shotPlayer.battlefield.getCell(x,y));
+    console.log("Response to " + shooterPlayer.name + " x:"+x+" y:"+y+" Cell State: "+shotPlayer.battlefield.getCell(x,y));
+    this.io.to(shooterPlayer.id).emit(SocketRoom.responsetoShot, x, y, shotPlayer.battlefield.getCell(x,y));
     //shotPlayer's turn
     room.currentPlayer = shotPlayer;
   }
@@ -203,6 +214,19 @@ export class SocketManager {
       SocketRoom.lobbyRoomsChanged,
       this.getLobbyData()
     ); 
+  }
+
+  clientError(roomId: string, userName : string, Error : socketError){
+    switch(Error){
+      case socketError.gameSequenceError:
+        console.error("Game Sequence Error from "+userName+", passed to both clients");
+        this.io.to(roomId).emit(SocketRoom.errorThrown, socketError.gameSequenceError);
+        break;
+      case socketError.gameNotStartedError:
+        console.error("Game not started Error, "+userName+" tried to shoot");
+        break;
+
+    }
   }
 
   getLobbyData() {

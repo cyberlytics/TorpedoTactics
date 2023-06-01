@@ -36,6 +36,10 @@ export class Room {
     startGame() {
         this.ingame = true;
         
+        this.players.forEach((player) =>{
+            player.state = GameState.ingame;
+        })
+
        // public game metadata
         this.currentPlayer = getRandomElementFromArray(this.players);
 
