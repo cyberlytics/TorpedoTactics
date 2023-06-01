@@ -3,10 +3,7 @@ import { BaseError } from './base-error';
 export class BadRequestError extends BaseError {
   private statusCode = 400;
 
-  constructor(
-    public message: string,
-    private suggestedApplicationActions: string[]
-  ) {
+  constructor(public message: string, private suggestedApplicationActions: string[]) {
     super();
 
     Object.setPrototypeOf(this, BadRequestError.prototype);

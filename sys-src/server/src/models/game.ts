@@ -85,3 +85,5 @@ gameSchema.methods.changeState = async function(newstate:Gamestate):Promise<Hydr
 
 
 
+
+export const Game = mongoose.model<IGame>('Game', gameSchema);

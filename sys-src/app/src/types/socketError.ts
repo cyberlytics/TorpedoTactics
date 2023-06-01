@@ -1,4 +1,4 @@
-export enum socketError{
-    gameNotStartedError = 'gameNotStartedError',
-    gameSequenceError = 'gameSequenceError',
+export enum socketError {
+  gameNotStartedError = 'gameNotStartedError',
+  gameSequenceError = 'gameSequenceError',
 }
