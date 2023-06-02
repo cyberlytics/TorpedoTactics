@@ -52,8 +52,8 @@ export default {
       validPos: {
         x: 0,
         y: 0,
-        dataX: 0,
-        dataY: 0
+        dataX: null as number,
+        dataY: null as number
       }
     }
   },
@@ -75,10 +75,33 @@ export default {
       this.startPos = { x, y }
       this.originPos = { x, y }
     },
-    handleClick() {
+    handleClick(e: any) {
       // this function handles the click event so that the ship can be dragged or rotated not both
       if (!this.dragging && !this.clicked) {
-        this.orientation = this.orientation === 'h' ? 'v' : 'h'
+        // on drag clean up store
+        if (this.validPos.dataX !== null && this.validPos.dataY !== null) {
+          cleanUpStore(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
+        }
+
+        // change orientation
+        const newOrientation = this.orientation === 'h' ? 'v' : 'h'
+
+        // validate position
+        if (validatePos(this.validPos.dataX, this.validPos.dataY, this.size, newOrientation)) {
+          // adjust orientation
+          this.orientation = newOrientation
+
+          // calculate new position and update it
+          this.dragging = true
+          this.drag(e)
+          this.dragEnd()
+          this.dragging = false
+        } else {
+          // invalidate position
+          this.validatedPos = false
+          this.pos = { ...this.originPos }
+          this.startPos = { ...this.originPos }
+        }
       }
 
       // clean up marked elements
@@ -101,7 +124,9 @@ export default {
       window.addEventListener('mouseup', this.dragEnd)
 
       // on drag clean up store
-      cleanUpStore(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
+      if (this.validPos.dataX !== null && this.validPos.dataY !== null) {
+        cleanUpStore(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
+      }
     },
     drag(e: any) {
       // stop if dragging is false

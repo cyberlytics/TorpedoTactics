@@ -5,7 +5,7 @@ import { it, describe, expect, beforeEach, vi } from 'vitest'
 import { useFieldStore } from '@/stores/field'
 
 // utils
-import { onField, savePositions, cleanUpStore } from '@/utils/utils' // replace this with your actual file path
+import { onField, savePositions, cleanUpStore, validatePos } from '@/utils/utils' // replace this with your actual file path
 
 vi.mock('@/stores/field') // Mock the entire module
 
@@ -139,6 +139,43 @@ describe('utils', () => {
       expect(removePos).toHaveBeenNthCalledWith(1, x, y)
       expect(removePos).toHaveBeenNthCalledWith(2, x, y + 1)
       expect(removePos).toHaveBeenNthCalledWith(3, x, y + 2)
+    })
+  })
+
+  describe('validatePosition', () => {
+    beforeEach(() => {
+      // Clear all instances and calls to constructor and all methods
+      ;(useFieldStore as any).mockClear()
+    })
+
+    it('returns false when position conflicts with existing ship', () => {
+      ;(useFieldStore as any).mockReturnValue({
+        field: [{ x: 5, y: 5 }]
+      })
+
+      const result = validatePos(5, 5, 1, 'h')
+      expect(result).toBe(false)
+    })
+
+    it('returns false when horizontal ship is out of bounds', () => {
+      ;(useFieldStore as any).mockReturnValue({ field: [] })
+
+      const result = validatePos(10, 5, 2, 'h')
+      expect(result).toBe(false)
+    })
+
+    it('returns false when vertical ship is out of bounds', () => {
+      ;(useFieldStore as any).mockReturnValue({ field: [] })
+
+      const result = validatePos(5, 10, 2, 'v')
+      expect(result).toBe(false)
+    })
+
+    it('returns true when position is valid', () => {
+      ;(useFieldStore as any).mockReturnValue({ field: [] })
+
+      const result = validatePos(5, 5, 1, 'h')
+      expect(result).toBe(true)
     })
   })
 })

@@ -22,11 +22,16 @@ export default {
   },
   mounted() {
     this.$nextTick(() => {
+      const gamefield = document.getElementById('game-field')
+      if (!gamefield) return
       let bottomMargin = 30 // Bottom margin
-      let gameFieldWidth = document.getElementById('game-field')?.clientWidth + 100
+
+      let gameFieldWidth = gamefield.clientWidth + 100
+
+      const { top } = gamefield.getBoundingClientRect()
 
       // Position ships beside game field
-      let currentTop = 50
+      let currentTop = top - 65
       this.ships = this.ships.map((ship) => {
         let x = gameFieldWidth
         let y = currentTop

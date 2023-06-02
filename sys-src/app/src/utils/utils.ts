@@ -57,17 +57,14 @@ export function validatePos(x: number, y: number, size: number, orientation: str
     } else {
       isConflict = store.field.some((pos: any) => pos.x === x && pos.y === y + i)
     }
-    if (isConflict) break
-  }
-
-  if (isConflict) {
-    return false
+    if (isConflict) return false
   }
 
   if (orientation === 'h' && x + size > 11) {
     return false
-  }
-  return !(orientation === 'v' && y + size > 11)
+  } else if (orientation === 'v' && y + size > 11) {
+    return false
+  } else return true
 }
 
 // ----------------------------------------------------------------
