@@ -1,4 +1,4 @@
-import { screen } from '@testing-library/dom'
+import { screen, waitFor } from '@testing-library/dom'
 import { it, describe, expect, beforeEach, vi } from 'vitest'
 
 // store
@@ -61,9 +61,9 @@ describe('utils', () => {
       expect(onField(120, 120)).toBe(false)
     })
 
-    it('should return false if the game field is not present', () => {
+    it('should return false if the game field is not present', async () => {
       const gameField = screen.getByTestId('game-field')
-      gameField?.parentNode?.removeChild(gameField)
+      await waitFor(() => gameField?.parentNode?.removeChild(gameField))
       expect(onField(20, 20)).toBe(false)
     })
   })

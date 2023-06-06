@@ -72,9 +72,13 @@ export function validatePos(x: number, y: number, size: number, orientation: str
 // ----------------------------------------------------------------
 export function getElementBelowPosition(x: number, y: number): HTMLElement | null {
   const topElement: any = document.elementFromPoint(x, y)
+  if (!topElement) return null
+
   topElement.style.visibility = 'hidden' // Hide the top element
 
   const belowElement = document.elementFromPoint(x, y) // Get the element below
+  if (!belowElement) return null
+
   topElement.style.visibility = '' // Show the top element again
 
   if (belowElement && belowElement.classList.contains('battlefield-cell')) {
