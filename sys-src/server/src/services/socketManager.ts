@@ -1,12 +1,14 @@
 //import { PublicGameMetadata } from "../types/publicGameMetadata";
 import { app } from '../app';
-import { GameParticipant, GameState } from '../types/gameParticipant';
+import { GameParticipant} from '../types/gameParticipant';
+import { clientGameState } from '../types/clientGameState';
 import { PublicRoomData } from '../types/publicRoomData';
 import { SocketRoom } from '../types/socketRoom';
 import { Room } from './room';
 import { Battlefield } from '../types/battlefield';
 import { socketError } from '../types/socketError';
 //import { read } from "fs";
+
 
 export class SocketManager {
   // logging
@@ -55,9 +57,6 @@ export class SocketManager {
     socket.on(SocketRoom.clientError, (roomId: string, userName: string, Error: socketError) =>
       this.clientError(roomId, userName, Error),
     );
-    if (this.userConnectionLog) {
-      console.log(`Client ${socket.id} connected. (${this.io.engine.clientsCount})`);
-    }
   }
 
   disconnectUser(userId: string) {
@@ -66,7 +65,19 @@ export class SocketManager {
     let joinedRoom = this.rooms.filter((room) =>
       room.players.some((player: GameParticipant) => player.id == userId),
     )[0];
-    if (joinedRoom) {
+
+    if (joinedRoom) {  
+      //check if one player won the game 
+      const wonPlayer = joinedRoom.players.find(player => player.state == clientGameState.won);
+      //if not -> one player aborted the game
+      if(joinedRoom.ingame && joinedRoom.players.length == 2 && wonPlayer == undefined){
+        const abortedPlayer : GameParticipant = joinedRoom.players.find(player => player.id != userId)!;
+        const abortingPlayer : GameParticipant = joinedRoom.players.find(player => player.id == userId)!;
+        //emit the aborted message to the other player
+        this.io.to(abortedPlayer.id).emit(SocketRoom.errorThrown, socketError.aborted);
+        this.endGame(abortedPlayer, abortingPlayer);
+      }
+      //leave the room
       this.leaveRoom(joinedRoom, userId);
     }
 
@@ -74,6 +85,7 @@ export class SocketManager {
       console.log(`Client ${userId} disconnected. (${this.io.engine.clientsCount})`);
     }
   }
+
 
   createRoom(roomId: string, userName: string) {
     // create and save new room
@@ -83,7 +95,6 @@ export class SocketManager {
       `Room of ${userName}`,
     );
     console.log('Neuen Raum mit Id: ' + newRoom.id);
-
     this.rooms.push(newRoom);
 
     // send updated lobby rooms to clients
@@ -105,11 +116,11 @@ export class SocketManager {
     room.players.push(new GameParticipant(socket.id, userName));
     socket.join(room.id);
 
-    // start game if full
-    if (room.isFull()) {
+    // delete later if not needed
+    /*if (room.isFull()) {
       console.log('Room is full');
       this.io.to(room.id).emit(SocketRoom.preparationStarted);
-    }
+    }*/
 
     // update lobby rooms
     this.io.emit(SocketRoom.lobbyRoomsChanged, this.getLobbyData());
@@ -122,17 +133,18 @@ export class SocketManager {
       return;
     }
 
+  
     //change player to ready
     const readyPlayer: GameParticipant = room.players.find(
       (player: GameParticipant) => player.name == userName,
     )!;
     //constructor, otherwise received battlefield is recognized as object
     readyPlayer.battlefield = new Battlefield(battlefield.grid);
-    readyPlayer.state = GameState.prepared;
+    readyPlayer.state = clientGameState.prepared;
     console.log(readyPlayer.id + 'is ready, Battlefield' + readyPlayer.battlefield.grid);
 
     //start game if both players ready
-    if (room.allPlayersReady()) {
+    if (room.allPlayersReady() && room.isFull()) {
       room.startGame();
 
       //send each player the start player and the data of the enemy
@@ -146,15 +158,14 @@ export class SocketManager {
       });
     }
   }
+  
 
   //Receives a shot from a player
   Shot(roomId: string, userName: string, x: number, y: number) {
-    const room = this.rooms.find((room) => room.id == roomId);
+    const room = this.rooms.find((room) => room.id == roomId)!;
     if (!room || !room.ingame || room.currentPlayer?.name != userName) {
       //Error Handling
-      if (!room?.ingame) {
-        this.io.emit(SocketRoom.errorThrown, socketError.gameNotStartedError);
-      } else if (room.currentPlayer?.name != userName) {
+      if (room.currentPlayer?.name != userName) {
         this.io.emit(SocketRoom.errorThrown, socketError.gameSequenceError);
       }
       return;
@@ -167,10 +178,7 @@ export class SocketManager {
 
     //check if Game ended
     if (shotPlayer.battlefield.gameEnded()) {
-      console.log(shotPlayer.name + ' lost');
-      shotPlayer.state = GameState.lost;
-      shooterPlayer.state = GameState.won;
-      console.log(shooterPlayer.name + ' won');
+      this.endGame(shooterPlayer, shotPlayer);
     }
 
     //Send shot to player who was shot
@@ -200,6 +208,7 @@ export class SocketManager {
     this.io
       .to(shooterPlayer.id)
       .emit(SocketRoom.responsetoShot, x, y, shotPlayer.battlefield.getCell(x, y));
+    
     //shotPlayer's turn
     room.currentPlayer = shotPlayer;
   }
@@ -218,15 +227,24 @@ export class SocketManager {
   }
 
   clientError(roomId: string, userName: string, Error: socketError) {
+    const room = this.rooms.find((room) => room.id == roomId);
+    if(!room) return;
     switch (Error) {
       case socketError.gameSequenceError:
         console.error('Game Sequence Error from ' + userName + ', passed to both clients');
         this.io.to(roomId).emit(SocketRoom.errorThrown, socketError.gameSequenceError);
         break;
-      case socketError.gameNotStartedError:
-        console.error('Game not started Error, ' + userName + ' tried to shoot');
-        break;
     }
+  }
+
+  endGame(winner : GameParticipant, looser : GameParticipant){
+    console.log(looser.name + ' lost');
+    console.log(winner.name + ' won');
+    looser.state = clientGameState.lost;
+    winner.state = clientGameState.won;
+    
+    //save gamedata here to database
+    //you get hits and misses with player.battlefield.getAmountCellState(cellState.shotShip);
   }
 
   getLobbyData() {
@@ -235,6 +253,7 @@ export class SocketManager {
       .filter((room) => !room.ingame)
       .map((room) => new PublicRoomData(room.id, room.name));
   }
+
 
   logRooms() {
     if (this.roomUpdateLog) {

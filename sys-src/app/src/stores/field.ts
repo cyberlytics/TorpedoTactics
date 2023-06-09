@@ -14,5 +14,9 @@ export const useFieldStore = defineStore('field', () => {
     }
   }
 
-  return { field, setPos, removePos }
+  function clear(){
+    field.value = [];
+  }
+
+  return { field, setPos, clear, removePos }
 })

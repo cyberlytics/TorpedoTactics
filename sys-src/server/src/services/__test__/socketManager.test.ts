@@ -1,4 +1,4 @@
-import { GameState } from '../../types/gameParticipant';
+import { clientGameState } from '../../types/clientGameState';
 import { SocketManager } from '../socketManager';
 import { Battlefield, cellState } from '../../types/battlefield';
 
@@ -84,6 +84,38 @@ describe('leaveRoom', () => {
   });
 });
 
+describe('disconnect', ()=> {
+  it('aborting correct handled', ()=>{
+    let userName1 = 'joinName1';
+  let userName2 = 'joinName2';
+  socketManager.createRoom('1', '1');
+  socketManager.joinRoom({ id: 'joinId1', join: () => {} }, '1', userName1);
+  socketManager.joinRoom({ id: 'joinId2', join: () => {} }, '1', userName2);
+
+  let grid1: cellState[][] = Array.from({ length: 2 }, () =>
+    Array.from({ length: 2 }, () => cellState.empty),
+  );
+  let grid2: cellState[][] = Array.from({ length: 2 }, () =>
+    Array.from({ length: 2 }, () => cellState.empty),
+  );
+  let battlefield1 = new Battlefield(grid1);
+  let battlefield2 = new Battlefield(grid2);
+  battlefield1.setCell(0, 0, cellState.ship);
+  battlefield2.setCell(0, 0, cellState.ship);
+
+  socketManager.preparationCompleted('1', userName1, battlefield1);
+  socketManager.preparationCompleted('1', userName2, battlefield2);
+
+  let player1 = socketManager.rooms[0].players.find((player) => player.name == userName1);
+  let player2 = socketManager.rooms[0].players.find((player) => player.name == userName2);
+  socketManager.rooms[0].currentPlayer = player1!;
+
+  socketManager.disconnectUser('joinId1');
+  expect(player1?.state).toBe(clientGameState.lost);
+  expect(player2?.state).toBe(clientGameState.won);
+  })
+})
+
 describe('getLobbyData', () => {
   it('only gets correct games', () => {
     // full room
@@ -123,7 +155,7 @@ describe('preparationCompleted', () => {
     socketManager.preparationCompleted('1', 'joinName1', battlefield);
     let readyPlayer = socketManager.rooms[0].players.find((player) => player.name == 'joinName1');
     expect(readyPlayer?.battlefield).toStrictEqual(battlefield);
-    expect(readyPlayer?.state).toBe(GameState.prepared);
+    expect(readyPlayer?.state).toBe(clientGameState.prepared);
   });
 });
 
@@ -143,8 +175,8 @@ describe('preparationCompleted', () => {
     socketManager.preparationCompleted('1', 'joinName1', battlefield);
     socketManager.preparationCompleted('1', 'joinName2', battlefield);
     expect(socketManager.rooms[0].ingame).toBe(true);
-    expect(socketManager.rooms[0].players[0].state).toBe(GameState.ingame);
-    expect(socketManager.rooms[0].players[1].state).toBe(GameState.ingame);
+    expect(socketManager.rooms[0].players[0].state).toBe(clientGameState.ingame);
+    expect(socketManager.rooms[0].players[1].state).toBe(clientGameState.ingame);
     expect(socketManager.rooms[0].currentPlayer).toBeDefined();
   });
 });
@@ -187,8 +219,8 @@ describe('shot', () => {
     expect(player2?.battlefield.getCell(1, 0)).toBe(cellState.empty);
     expect(socketManager.rooms[0].currentPlayer).toStrictEqual(player1);
 
-    expect(player1?.state).toBe(GameState.ingame);
-    expect(player2?.state).toBe(GameState.ingame);
+    expect(player1?.state).toBe(clientGameState.ingame);
+    expect(player2?.state).toBe(clientGameState.ingame);
   });
 });
 
@@ -219,7 +251,7 @@ describe('shot', () => {
     socketManager.rooms[0].currentPlayer = player1!;
 
     socketManager.Shot('1', userName1, 0, 0);
-    expect(player2?.state).toBe(GameState.lost);
-    expect(player1?.state).toBe(GameState.won);
+    expect(player2?.state).toBe(clientGameState.lost);
+    expect(player1?.state).toBe(clientGameState.won);
   });
 });

@@ -1,21 +1,34 @@
 <template>
   <Lobby
-    v-if="!currentRoomId"
+    v-if="state === clientGameState.inlobby"
     :rooms="roomData"
     :userName="userName"
     @createRoom="createRoom"
     @joinRoom="joinRoom"
   />
+  <Preparation
+    v-if="state === clientGameState.preparation || state === clientGameState.prepared"
+    @completePreparation="completePreparation"
+    :amountShips="amountShips"
+    :battlefieldSize="battlefieldSize"
+    @endGame="endGame"
+    />
   <Game
-    v-else
+    v-if="state === clientGameState.ingame"
     :userName="userName"
     :enemyName="enemyName"
     :myTurn="myTurn"
-    :battlefieldSize="battlefieldSize"
-    :amountShips="amountShips"
-    @completePreparation="completePreparation"
-    @shoot="shoot"
+    :myBattlefield="myBattlefield"
+    :enemyBattlefield="enemyBattlefield"
+    :state="state"
+    @shoot="shoot"   
+    @endGame="endGame"
   />
+  <div v-if="state === clientGameState.won || state === clientGameState.lost">
+    <p v-if="state === clientGameState.won">Sie haben gegen {{ enemyName }} gewonnen</p>
+    <p v-else>Sie haben gegen {{ enemyName }} verloren</p>
+    <button @click="endGame()">Zur Lobby</button>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -23,23 +36,29 @@
 import { ref } from 'vue';
 import { io } from 'socket.io-client';
 import Lobby from '../components/game/Lobby.vue';
+import Preparation from '@/views/HomeView.vue'
 import Game from '../components/game/Game.vue';
 import type { PublicRoomData } from '@/types/publicRoomData';
+
+import {clientGameState} from '@/types/clientGameState'
 import { SocketRoom } from '@/types/socketRoom';
 import { Battlefield, createEmptyGrid, cellState } from '@/types/battlefield';
 import { socketError } from '@/types/socketError';
+import { useFieldStore } from '@/stores/field';
 //#endregion imports
 
 const url = 'http://localhost:3000';
-const socket = io(url);
+let socket = io(url);
 
 const roomData = ref<PublicRoomData[]>();
 const currentRoomId = ref<string>();
+
+let state = ref<clientGameState>(clientGameState.inlobby);
 const userName = ref<string>(getRandomName());
 const enemyName = ref<string>();
 
-const battlefieldSize = ref<number>(2);
-const amountShips = ref<number>(2);
+const battlefieldSize = 11;
+const amountShips = 30;
 
 //true if its your turn to shoot
 let myTurn = ref<Boolean>(false);
@@ -47,8 +66,9 @@ let myTurn = ref<Boolean>(false);
 let myBattlefield = ref<Battlefield>();
 let enemyBattlefield = ref<Battlefield>();
 
-//#region subscribe
+window.onbeforeunload = (event) => endGame();
 
+//#region subscribe
 socket.on(SocketRoom.lobbyRoomsChanged, (openRooms: PublicRoomData[]) => {
   roomData.value = openRooms;
 });
@@ -63,7 +83,7 @@ socket.on(SocketRoom.gameStarted, (currentPlayerName: string, enemyPlayerName: s
   enemyName.value = enemyPlayerName;
 
   //constructor, otherwise received battlefield is recognized as object
-  enemyBattlefield.value = new Battlefield(createEmptyGrid(battlefieldSize.value));
+  enemyBattlefield.value = new Battlefield(createEmptyGrid(battlefieldSize));
   console.log('Default Enemy Battlefield: ' + enemyBattlefield.value.grid);
 
   if (currentPlayerName == userName.value) {
@@ -71,6 +91,7 @@ socket.on(SocketRoom.gameStarted, (currentPlayerName: string, enemyPlayerName: s
   } else {
     myTurn.value = false;
   }
+  state.value = clientGameState.ingame;
 });
 
 //shot from enemy
@@ -84,14 +105,31 @@ socket.on(SocketRoom.receivedShot, (x: number, y: number) => {
     //checks if I have been defeated
     if (myBattlefield.value!.gameEnded()) {
       console.log('You ' + 'lost');
-      socket.disconnect();
+      state.value = clientGameState.lost;
+      //socket.disconnect();
     } else {
       myTurn.value = true;
     }
   }
 });
 
-//response to shot from enemy
+//Received Error from Server
+socket.on(SocketRoom.errorThrown, (error : socketError) => {
+  //only handled error is aborted
+  if(error == socketError.aborted){
+    switch(state.value){
+      case clientGameState.ingame:
+        console.error("Other player aborted");
+        state.value = clientGameState.won;
+        break;
+      default:
+        state.value = clientGameState.inlobby;
+        endGame();
+    }
+  }
+} )
+
+//response to shot to enemy
 socket.on(SocketRoom.responsetoShot, (x: number, y: number, changedCell: cellState) => {
   if (myTurn.value) {
     //could save x and y and check if the server return the right x and y
@@ -99,9 +137,10 @@ socket.on(SocketRoom.responsetoShot, (x: number, y: number, changedCell: cellSta
     enemyBattlefield.value!.setCell(x, y, changedCell);
     console.log('New value enemy battlefied known: ' + enemyBattlefield.value?.grid);
 
-    if (enemyBattlefield.value?.getamountCellState(cellState.shotShip) == amountShips.value) {
+    if (enemyBattlefield.value?.getamountCellState(cellState.shotShip) == amountShips) {
       console.log('You won');
-      socket.disconnect();
+      state.value = clientGameState.won;
+      //socket.disconnect();
     }
     myTurn.value = false;
   } else {
@@ -114,17 +153,12 @@ socket.on(SocketRoom.responsetoShot, (x: number, y: number, changedCell: cellSta
     );
   }
 });
-
-//received error from server
-socket.on(SocketRoom.errorThrown, (thrownError: socketError) => {
-  console.error('Error from server received: ' + thrownError + '. Disconnect');
-  //socket.disconnect();
-});
-
 //#endregion subscribe
+
 
 //#region publish
 
+//creates room and the joins it
 function createRoom() {
   console.log('create room');
   const uniqueRoomId: string = Date.now().toString() + Math.random().toString(36).slice(2);
@@ -133,19 +167,22 @@ function createRoom() {
   joinRoom(uniqueRoomId);
 }
 
+//joins the room, starts the preparation
 function joinRoom(roomId: string) {
   console.log('join room' + roomId);
   currentRoomId.value = roomId;
+  state.value = clientGameState.preparation;
 
   socket.emit(SocketRoom.roomJoined, roomId, userName.value);
 }
 
-//needs to get the battlefield from Game.vue
 //starts the Game
 function completePreparation(battlefield: Battlefield) {
-  myBattlefield.value = battlefield as Battlefield;
-  console.log('start game, my battlefield:' + myBattlefield.value.grid);
-  socket.emit(SocketRoom.preparationCompleted, currentRoomId.value, userName.value, battlefield);
+    console.log("Preparation completed");
+    myBattlefield.value = battlefield as Battlefield;
+    console.log('start game, my battlefield:' + myBattlefield.value.grid);
+    state.value = clientGameState.prepared;
+    socket.emit(SocketRoom.preparationCompleted, currentRoomId.value, userName.value, battlefield);
 }
 
 //needs to get x and y from Game.vue
@@ -162,6 +199,18 @@ function shoot(x: number, y: number) {
       socketError.gameSequenceError,
     );
   }
+}
+
+//actions that after a ended game, a new game could start
+function endGame(){
+  const field = useFieldStore();
+  field.clear();
+
+  state.value = clientGameState.inlobby;
+  //to leave the room
+  socket.disconnect();
+  //if not reloaded, to connect again
+  socket.connect();
 }
 
 //#endregion publish
