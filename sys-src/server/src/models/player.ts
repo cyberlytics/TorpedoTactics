@@ -2,16 +2,19 @@ import mongoose, { Schema, Model, HydratedDocument } from 'mongoose';
 
 export interface IPlayer {
   userid?: Schema.Types.ObjectId;
-  statistics: {
+  stats: {
     gamesplayed: number;
     gameswon: number;
     timespend: number;
-    hitmissrate: number;
+    hits: number;
+    misses: number;
   };
   games?: Schema.Types.ObjectId[];
 }
 
-export interface IPlayerMethods {}
+export interface IPlayerMethods {
+  updateStats(won: boolean,hits: number,misses: number,timespend: number)  : Promise<HydratedDocument<IPlayer, IPlayerMethods>>
+}
 
 interface IPlayerModel extends Model<IPlayer, {}, IPlayerMethods> {
   getPlayers(): Promise<HydratedDocument<IPlayer, IPlayerMethods>[]>;
@@ -20,7 +23,7 @@ interface IPlayerModel extends Model<IPlayer, {}, IPlayerMethods> {
 
 const playerSchema: Schema<IPlayer, IPlayerModel> = new Schema<IPlayer, IPlayerModel>({
   userid: { type: Schema.Types.ObjectId, ref: 'User' }, //userid should be unique on production
-  statistics: { type: Object, required: true },
+  stats: { type: Object, required: true },
   games: [{ type: Schema.Types.ObjectId, ref: 'Game' }],
 });
 
@@ -34,7 +37,7 @@ playerSchema.statics.addPlayer = async function (): Promise<
   HydratedDocument<IPlayer, IPlayerMethods>
 > {
   const newPlayer: IPlayer = {
-    statistics: { gamesplayed: 0, gameswon: 0, timespend: 0.0, hitmissrate: 0.0 },
+    stats: { gamesplayed: 0, gameswon: 0, timespend: 0.0, hitmissrate: 0.0 },
   };
   return await this.create(newPlayer);
 };
@@ -47,4 +50,20 @@ playerSchema.statics.getPlayers = async function (): Promise<
   HydratedDocument<IPlayer, IPlayerMethods>[]
 > {
   return await this.find();
+};
+
+playerSchema.methods.updateStats = async function (
+won: boolean,
+hits: number,
+misses: number,
+timespend: number,  
+): Promise<HydratedDocument<IPlayer, IPlayerMethods>> {
+  this.stats.gamesplayed += 1;
+  this.stats.misses += misses;
+  this.stats.hits += hits;
+  this.stats.timespend += timespend;
+  if (won) {
+    this.stats.gameswon += 1;
+  }
+  return await this.save();
 };
