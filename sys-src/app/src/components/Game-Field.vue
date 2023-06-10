@@ -1,35 +1,55 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref} from 'vue'
+import { Battlefield, cellState} from '@/types/battlefield'
+
 
 const rows = ref(11) // Number of rows including the markers row
 const cols = ref(11) // Number of columns including the markers column
 
+
+const emit = defineEmits(['shoot']);
+
 const getColLetter = (i: any) => String.fromCharCode(65 + i) // 65 is the ASCII value for 'A'
 
-const drop = (e: any) => {
-  console.log(e)
-  const ship_id = e.dataTransfer.getData('ship_id')
-
-  const ship = document.getElementById(ship_id)
-
-  if (ship) {
-    ship.style.display = 'block'
-
-    ship.style.left = e.target.offsetLeft + 2 + 'px'
-    ship.style.top = e.target.offsetTop + 2 + 'px'
-
-    e.target.appendChild(ship)
-  }
+const click = (e: any) => {
+  if(!props.clickable || !props.battlefield?.cellShootable(e.target.dataset.x,e.target.dataset.y))return;
+  emit('shoot', e.target.dataset.x, e.target.dataset.y);
+  console.log("Clicked "+ e.target.dataset.x + "  "+ e.target.dataset.y);
 }
+
+function getCellStyle(x : number, y: number){
+  let cellStyle = '';
+  switch(props.battlefield?.getCell(x-1, y-1)){
+    case cellState.ship:
+      cellStyle = 'battlefield-cell__ship'; 
+      break;
+    case cellState.shotShip:
+      cellStyle = 'battlefield-cell__shotship';
+      break;
+    case cellState.shotEmpty:
+      cellStyle = 'battlefield-cell__shotempty';
+  }
+  return cellStyle;
+}
+
+const props = defineProps({
+    battlefield: Battlefield,
+    clickable:{
+      type: Boolean,
+      required: false,
+    },
+    cellStyle: String,
+});
+
 </script>
 
 <template>
   <div class="battlefield-table-wrapper">
-    <table @dragover.prevent @drop.prevent="drop" id="game-field">
+    <table id="game-field">
       <tbody>
         <tr v-for="y in rows" :key="y" class="battlefield-row">
           <td v-for="x in cols" :key="x" class="battlefield-cell battlefield-cell__empty">
-            <div class="battlefield-cell-content" :data-y="y - 1" :data-x="x - 1">
+            <div class="battlefield-cell-content" :class="getCellStyle(x,y)" :data-y="y - 1" :data-x="x - 1" @click="click">
               <div v-if="x === 1" class="marker marker__row">{{ y }}</div>
               <div v-if="y === 1" class="marker marker__col">{{ getColLetter(x - 1) }}</div>
             </div>
@@ -78,6 +98,18 @@ tr {
   position: relative;
   height: 2em;
   width: 2em;
+}
+
+.battlefield-cell__ship{
+  background-color: aliceblue;
+}
+
+.battlefield-cell__shotship{
+  background-color: red;
+}
+
+.battlefield-cell__shotempty{
+  background-color: gray;
 }
 
 .marker__row {

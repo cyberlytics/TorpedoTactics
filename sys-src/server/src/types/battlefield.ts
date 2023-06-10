@@ -1,3 +1,8 @@
+/*
+ * same class as in sys-src/app/src/types
+ */
+
+
 export enum cellState {
   empty = 0,
   ship,
@@ -5,6 +10,14 @@ export enum cellState {
   shotEmpty,
   blocked,
 }
+
+//to init a battlefield object
+export function createEmptyGrid(gridSize: number) : cellState[][] {
+  return Array(gridSize)
+    .fill(null)
+    .map(() => Array(gridSize).fill(cellState.empty));
+}
+
 
 export class Battlefield {
   length: number;
@@ -19,25 +32,34 @@ export class Battlefield {
     this.amountShips = this.getamountCellState(cellState.ship);
   }
 
-  getCell(x: number, y: number): cellState {
+  getCell(x: number, y: number): cellState | undefined {
+    if(x < 0 || x >= this.length) return;
+    if(y < 0 || y >= this.length) return;
     return this.grid[y][x];
   }
 
-  setCell(x: number, y: number, newCell: cellState): void {
+  setCell(x: number, y: number, newCell: cellState): boolean {
+    if(x < 0 || x >= this.length) return false;
+    if(y < 0 || y >= this.length) return false;
+    if(newCell == cellState.ship)this.amountShips++;
     this.grid[y][x] = newCell;
+    return true;
   }
 
-  receiveShot(x: number, y: number) {
-    const shotField: cellState = this.grid[y][x];
+  receiveShot(x: number, y: number): boolean {
+    const shotField: cellState | undefined = this.getCell(x,y);
+    if(shotField === undefined) return false;
+    let cellSet : boolean = false;
     switch (shotField) {
       case cellState.empty:
-        this.grid[y][x] = cellState.shotEmpty;
+        cellSet = this.setCell(x,y,cellState.shotEmpty);
         break;
       case cellState.ship:
-        this.grid[y][x] = cellState.shotShip;
+        cellSet = this.setCell(x,y,cellState.shotShip);
         this.amountShips--;
         break;
     }
+    return cellSet;
   }
 
   getamountCellState(cellstate: cellState): number {
@@ -54,5 +76,10 @@ export class Battlefield {
 
   gameEnded(): boolean {
     return this.amountShips == 0;
+  }
+
+  cellShootable(x: number, y: number) : boolean{
+    if(this.getCell(x,y) == cellState.shotEmpty || this.getCell(x,y) == cellState.shotShip)return false;
+    return true;
   }
 }

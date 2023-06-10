@@ -1,4 +1,5 @@
-import { GameParticipant, GameState } from '../types/gameParticipant';
+import { GameParticipant} from '../types/gameParticipant';
+import { clientGameState } from '../types/clientGameState';
 import { getRandomElementFromArray } from './helperFunctions';
 
 export class Room {
@@ -29,14 +30,14 @@ export class Room {
   }
 
   allPlayersReady(): boolean {
-    return this.players.every((player) => player.state == GameState.prepared);
+    return this.players.every((player) => player.state == clientGameState.prepared);
   }
 
   startGame() {
     this.ingame = true;
 
     this.players.forEach((player) => {
-      player.state = GameState.ingame;
+      player.state = clientGameState.ingame;
     });
 
     // public game metadata

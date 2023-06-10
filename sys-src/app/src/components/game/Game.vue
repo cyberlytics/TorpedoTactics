@@ -5,61 +5,50 @@
   <div class="table">
     <p v-if="myTurn">Du bist dran</p>
     <p v-else>Es ist nicht dein Zug</p>
-    <button @click="completePreparation()">Ready</button>
-    <button @click="shoot()">Shoot</button>
+    <Game :battlefield="myBattlefield"/>
+    <Game :battlefield="enemyBattlefield" :clickable="true" @shoot="shoot"/>
   </div>
   <div class="player">
     <h3>player: {{ userName }}</h3>
+    <button @click="leaveGame()"> Spiel verlassen</button>
   </div>
 </template>
 
 <script setup lang="ts">
 //#region imports
+import { defineComponent, ref } from 'vue';
 import { Battlefield, cellState, createGrid } from '@/types/battlefield';
-import { computed } from 'vue';
+import Game from '@/components/Game-Field.vue'; 
+
 //#endregion imports
 
 const props = defineProps({
   userName: String,
   enemyName: String,
   myTurn: Boolean,
-  battlefieldSize: Number,
-  amountShips: Number,
+  myBattlefield: Battlefield,
+  enemyBattlefield: Battlefield,
+  state: Number,
 });
 
-/* Delete later
-const enemy = computed(() => {
-    const enemy = props.publicGameMetadata?.playersData
-        .filter((player) => player.name != props.userName)[0].name;
-  
-    return enemy;
-});*/
+defineComponent({
+  components: {Game}
+})
 
-const emit = defineEmits(['completePreparation', 'shoot']);
+const emit = defineEmits(['shoot','endGame']);
 
-function completePreparation() {
+/*function completePreparation() {
   emit('completePreparation', getRandomBattlefied());
-}
-
-function shoot() {
-  emit(
-    'shoot',
-    Math.floor(Math.random() * props.battlefieldSize!),
-    Math.floor(Math.random() * props.battlefieldSize!),
-  );
-}
-
-//Helper Functions, remove later
-function getRandomBattlefied(): Battlefield {
-  return new Battlefield(createGrid(props.battlefieldSize!, props.amountShips!));
-}
-
-/* Not needed, delete later
-function getRandomCellState() : cellState {
-  const values = [cellState.empty, cellState.ship];
-  const randomIndex = Math.floor(Math.random() * values.length);
-  return values[randomIndex];
 }*/
+
+function shoot(x : number, y: number) {
+  emit('shoot',x,y);
+}
+
+function leaveGame(){
+  emit('endGame');
+}
+
 </script>
 
 <style>
@@ -78,7 +67,7 @@ body > div {
 
 .player {
   position: absolute;
-  inset: auto 0 0 0;
+  inset: 600px 0 0 0;
 
   border: solid 2px orange;
   height: 100px;

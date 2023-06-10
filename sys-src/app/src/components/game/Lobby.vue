@@ -7,7 +7,6 @@
     <h2>Create</h2>
     <br />
     <button @click="createRoom()">Create room</button>
-
     <br /><br />
     <!-- <hr> -->
     <br />
@@ -31,7 +30,7 @@ const props = defineProps({
   rooms: Array<PublicRoomData>,
   userName: String,
 });
-const emit = defineEmits(['createRoom', 'joinRoom']);
+const emit = defineEmits(['createRoom', 'joinRoom','abort']);
 
 function createRoom() {
   emit('createRoom');
@@ -40,4 +39,5 @@ function createRoom() {
 function joinRoom(roomId: string) {
   emit('joinRoom', roomId);
 }
+
 </script>
