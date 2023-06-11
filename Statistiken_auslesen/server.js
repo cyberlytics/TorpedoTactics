@@ -1,6 +1,6 @@
 
 const express = require('express');
-const app = express();
+const server = express();
 // port muss angepasst werden
 const port = 3000;
 const { MongoClient } = require('mongodb');
@@ -9,12 +9,12 @@ const { MongoClient } = require('mongodb');
 const uri = 'mongodb://localhost:3/deineDatenbank'; 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
-app.listen(port, () =>{
+server.listen(port, () =>{
     console.log('Der Server läuft auf Port ${port}');
 });
 
 // Route zur Mongo DB muss angepasst werden
-app.get('/daten', async (req, res) => {
+server.get('/daten', async (req, res) => {
   try {
     // Verbindung zur Datenbank herstellen
     await client.connect();
