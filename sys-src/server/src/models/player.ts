@@ -19,6 +19,7 @@ export interface IPlayerMethods {
 interface IPlayerModel extends Model<IPlayer, {}, IPlayerMethods> {
   getPlayers(): Promise<HydratedDocument<IPlayer, IPlayerMethods>[]>;
   addPlayer(): Promise<HydratedDocument<IPlayer, IPlayerMethods>>;
+  getPlayerbyUserId(userid:Schema.Types.ObjectId): Promise<HydratedDocument<IPlayer, IPlayerMethods>|null>;
 }
 
 const playerSchema: Schema<IPlayer, IPlayerModel> = new Schema<IPlayer, IPlayerModel>({
@@ -50,6 +51,12 @@ playerSchema.statics.getPlayers = async function (): Promise<
   HydratedDocument<IPlayer, IPlayerMethods>[]
 > {
   return await this.find();
+};
+
+playerSchema.statics.getPlayerbyUserId = async function (userid:Schema.Types.ObjectId): Promise<
+  HydratedDocument<IPlayer, IPlayerMethods>|null> 
+  {
+  return await this.findOne({ userid: userid });
 };
 
 playerSchema.methods.updateStats = async function (

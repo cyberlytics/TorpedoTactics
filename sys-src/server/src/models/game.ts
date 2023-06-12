@@ -6,7 +6,6 @@ export enum Gamestate {
   terminated = 'terminated',
   aborted = 'aborted',
 }
-
 export interface IGame {
   playerid1: Schema.Types.ObjectId;
   playerid2: Schema.Types.ObjectId;
@@ -48,6 +47,8 @@ interface IGameModel extends Model<IGame, {}, IGameMethods> {
     id2: Schema.Types.ObjectId,
   ): Promise<HydratedDocument<IGame, IGameMethods>>;
   getGames(): Promise<HydratedDocument<IGame, IGameMethods>[]>;
+  getGamebyPlayers (playerid1:Schema.Types.ObjectId, playerid2:Schema.Types.ObjectId): Promise<HydratedDocument<IGame, IGameMethods> | null> 
+
 }
 
 //static methods
@@ -78,10 +79,18 @@ gameSchema.statics.getGame = async function (
   return await this.find(gameId);
 };
 
-/*
-    Next static Functions:
-    - getGame(gameid)
-*/
+
+gameSchema.statics.getGamebyPlayers = async function (playerid1:Schema.Types.ObjectId, playerid2:Schema.Types.ObjectId): Promise<HydratedDocument<IGame, IGameMethods> | null> {
+let gamebuffer:HydratedDocument<IGame, IGameMethods> |null = await this.findOne({playerid1:playerid1, playerid2:playerid2,state:Gamestate.running});
+if(gamebuffer!=null){
+  return gamebuffer;
+}
+else{
+  return await this.findOne({playerid1:playerid2, playerid2:playerid1,state:Gamestate.running});
+  
+}
+};
+
 
 //instance methods
 gameSchema.methods.changeState = async function (

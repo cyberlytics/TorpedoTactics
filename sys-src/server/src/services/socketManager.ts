@@ -7,6 +7,7 @@ import { SocketRoom } from '../types/socketRoom';
 import { Room } from './room';
 import { Battlefield } from '../types/battlefield';
 import { socketError } from '../types/socketError';
+import { endGame, addGame } from './db';
 //import { read } from "fs";
 
 
@@ -156,6 +157,7 @@ export class SocketManager {
           .to(player.id)
           .emit(SocketRoom.gameStarted, room.currentPlayer?.name, enemyPlayer.name);
       });
+      addGame(room.players[0].name, room.players[1].name);
     }
   }
   
@@ -242,6 +244,7 @@ export class SocketManager {
     console.log(winner.name + ' won');
     looser.state = clientGameState.lost;
     winner.state = clientGameState.won;
+    endGame(winner.name, looser.name,winner.name, winner.battlefield.getamountCellState(cellState.shotShip), winner.battlefield.getamountCellState(cellState.shotShip), looser.name, looser.battlefield.getamountCellState(cellState.shotShip),looser.battlefield.getamountCellState(cellState.shotShip),winner.battlefield.getamountCellState(cellState.shotEmpty), looser.battlefield.getamountCellState(cellState.shotEmpty) );
     
     //save gamedata here to database
     //you get hits and misses with player.battlefield.getAmountCellState(cellState.shotShip);
