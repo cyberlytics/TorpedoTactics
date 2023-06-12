@@ -5,7 +5,8 @@
   "main": "server.ts",
   "scripts": {
     "test": "jest --watchAll --no-cache --runInBand",
-    "start": "ts-node-dev src/server.ts"
+    "start": "ts-node-dev src/server.ts",
+    "test:coverage": "jest --coverage --no-cache --runInBand"
   },
   "jest": {
     "preset": "ts-jest",
