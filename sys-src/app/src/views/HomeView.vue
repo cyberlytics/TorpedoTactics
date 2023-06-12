@@ -1,10 +1,25 @@
+<template>
+  <Game />
+  <Ship
+    v-for="ship in ships"
+    :key="ship.id"
+    :id="ship.id"
+    :size="ship.size"
+    :x="ship.x"
+    :y="ship.y"
+  />
+  <button v-if="store.field.length === amountShips && battlefieldConfirmed === false"
+  @click="confirmBattlefield()">Aktuelles Spielfeld übernehmen</button>
+  <div v-if="firstBattlefieldConfirmed">Spielfeld bestätigt, Warten auf Gegner</div>
+  <button v-if="firstBattlefieldConfirmed===false" @click="leaveRoom()">Lobby verlassen</button>
+</template>
+
 <script setup lang="ts">
 import { ref, onMounted, nextTick, watch } from 'vue';
 import Game from '@/components/Game-Field.vue';
 import Ship from '@/components/Ship.vue';
 import { Battlefield, cellState, createEmptyGrid } from '@/types/battlefield';
-import { useFieldStore } from '@/stores/field'
-import { clientGameState } from '@/types/clientGameState';
+import { useFieldStore } from '@/stores/field';
 
 
 const props = defineProps({
@@ -70,7 +85,7 @@ function createBattlefieldFromStore(mystore : any) : Battlefield{
         newbattlefield.setCell(mystore.field[i].x, mystore.field[i].y, cellState.ship);
     }
     return newbattlefield;
-    
+
 }
 
 function leaveRoom(){
@@ -83,19 +98,3 @@ watch(()=>store.field.length, (newVal, oldVal)=>{
   }
 }, {deep:true})
 </script>
-
-<template>
-  <Game />
-  <Ship
-    v-for="ship in ships"
-    :key="ship.id"
-    :id="ship.id"
-    :size="ship.size"
-    :x="ship.x"
-    :y="ship.y"
-  />
-  <button v-if="store.field.length === amountShips && battlefieldConfirmed === false"
-  @click="confirmBattlefield()">Aktuelles Spielfeld übernehmen</button>
-  <div v-if="firstBattlefieldConfirmed">Spielfeld bestätigt, Warten auf Gegner</div>
-  <button v-if="firstBattlefieldConfirmed===false" @click="leaveRoom()">Lobby verlassen</button>
-</template>
