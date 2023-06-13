@@ -38,7 +38,7 @@ playerSchema.statics.addPlayer = async function (): Promise<
   HydratedDocument<IPlayer, IPlayerMethods>
 > {
   const newPlayer: IPlayer = {
-    stats: { gamesplayed: 0, gameswon: 0, timespend: 0.0, hitmissrate: 0.0 },
+    stats: { gamesplayed: 0, gameswon: 0, timespend: 0.0, hits: 0, misses: 0},
   };
   return await this.create(newPlayer);
 };

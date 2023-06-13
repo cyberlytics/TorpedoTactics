@@ -33,8 +33,6 @@ const gameSchema: Schema<IGame, IGameModel> = new Schema<IGame, IGameModel>({
   missesplayer2: { type: Number },
 });
 
-export const Game = mongoose.model<IGame, IGameModel>('Game', gameSchema);
-
 //methods for e Game Instance (Document)
 export interface IGameMethods {
   endGame(winnerid:Schema.Types.ObjectId,hitsplayer1:number,hitsplayer2:number,missesplayer1:number,missesplayer2:number): Promise<HydratedDocument<IGame, IGameMethods>>;

@@ -1,7 +1,7 @@
 import { HydratedDocument,Schema } from 'mongoose'
-import { User,IUser } from "src/models/user";
-import { Game, IGame, IGameMethods } from "src/models/game";
-import { Player, IPlayer } from "src/models/player";
+import { User,IUser } from "../models/user";
+import { Game, IGame, IGameMethods } from "../models/game";
+import { Player, IPlayer } from "../models/player";
 
 
 
