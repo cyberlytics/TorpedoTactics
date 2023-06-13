@@ -1,9 +1,14 @@
 import { app } from './app';
 import { SocketManager } from './services/socketManager';
 import mongoose from 'mongoose';
+import 'dotenv/config'
+
 
 const start = async () => {
   try {
+    if (!process.env.JWT_KEY) {
+      throw new Error('JWT_KEY must be defined')
+    }
     await mongoose
       .connect(
         'mongodb+srv://gruppegruen:TorpedoTactics@bcn.xuho2ki.mongodb.net/?retryWrites=true&w=majority',
