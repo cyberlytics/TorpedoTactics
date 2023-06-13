@@ -1,4 +1,5 @@
 import mongoose, { HydratedDocument, Model, Schema } from 'mongoose';
+import {Player} from './player'
 
 export interface IUser {
   username: string;
@@ -9,9 +10,8 @@ interface IUserMethods {}
 
 export interface IUserModel extends Model<IUser, {}, IUserMethods> {
   createUser(username: string, password_hash: string): Promise<HydratedDocument<IUser, IUserModel>>;
-  getUsers(): Promise<HydratedDocument<IUser, IUserModel>[]>;
+  getAllUsers(): Promise<HydratedDocument<IUser, IUserModel>[]>;
   getOneUser(userid: Schema.Types.ObjectId): Promise<HydratedDocument<IUser, IUserModel>>;
-  addUser(): Promise<HydratedDocument<IUser, IUserModel>>;
   getUserByName(username: string): Promise<HydratedDocument<IUser, IUserModel>>;
 }
 
@@ -20,10 +20,8 @@ const userSchema: Schema<IUser, IUserModel> = new Schema<IUser, IUserModel>({
   password_hash: { type: String, required: true, unique: true },
 });
 
-export const User = mongoose.model<IUser, IUserModel>('User', userSchema);
-
 /**
- * Create a User in Database
+ * Create a User in Database (adds player automatically)
  * @param username
  * @param password_hash
  * @returns Object of the create User
@@ -36,7 +34,9 @@ userSchema.statics.createUser = async function (
     username: username,
     password_hash: password_hash,
   };
-  return await this.create(newUser);
+  const newUserInDb : HydratedDocument<IUser> =  await this.create(newUser);
+  await Player.addPlayer(newUserInDb.id);
+  return newUserInDb;
 };
 
 /**
@@ -68,3 +68,5 @@ userSchema.statics.getUserByName = async function (
 ): Promise<HydratedDocument<IUser> | null> {
   return await this.findOne({ username: username });
 };
+
+export const User = mongoose.model<IUser, IUserModel>('User', userSchema);

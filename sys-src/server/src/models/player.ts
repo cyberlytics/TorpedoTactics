@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model, HydratedDocument } from 'mongoose';
 
 export interface IPlayer {
-  userid?: Schema.Types.ObjectId;
+  userid: Schema.Types.ObjectId;
   stats: {
     gamesplayed: number;
     gameswon: number;
@@ -18,26 +18,26 @@ export interface IPlayerMethods {
 
 interface IPlayerModel extends Model<IPlayer, {}, IPlayerMethods> {
   getPlayers(): Promise<HydratedDocument<IPlayer, IPlayerMethods>[]>;
-  addPlayer(): Promise<HydratedDocument<IPlayer, IPlayerMethods>>;
+  addPlayer(id:Schema.Types.ObjectId): Promise<HydratedDocument<IPlayer, IPlayerMethods>>;
   getPlayerbyUserId(userid:Schema.Types.ObjectId): Promise<HydratedDocument<IPlayer, IPlayerMethods>|null>;
 }
 
 const playerSchema: Schema<IPlayer, IPlayerModel> = new Schema<IPlayer, IPlayerModel>({
-  userid: { type: Schema.Types.ObjectId, ref: 'User' }, //userid should be unique on production
+  userid: { type: Schema.Types.ObjectId, required: true,ref: 'User' }, //userid should be unique on production
   stats: { type: Object, required: true },
   games: [{ type: Schema.Types.ObjectId, ref: 'Game' }],
 });
 
-export const Player = mongoose.model<IPlayer, IPlayerModel>('Player', playerSchema);
 
 /**
  * Create a Player in Database
  * @returns Object of the create Player
  */
-playerSchema.statics.addPlayer = async function (): Promise<
+playerSchema.statics.addPlayer = async function (id : Schema.Types.ObjectId): Promise<
   HydratedDocument<IPlayer, IPlayerMethods>
 > {
   const newPlayer: IPlayer = {
+    userid: id,
     stats: { gamesplayed: 0, gameswon: 0, timespend: 0.0, hits: 0, misses: 0},
   };
   return await this.create(newPlayer);
@@ -74,3 +74,5 @@ timespend: number,
   }
   return await this.save();
 };
+
+export const Player = mongoose.model<IPlayer, IPlayerModel>('Player', playerSchema);
