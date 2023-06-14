@@ -1,27 +1,51 @@
-import request from 'supertest'
-import { app } from '../../app'
+import request from 'supertest';
+import { app } from '../../app';
+import { validateRequest } from '../validate-request';
+import { validationResult } from 'express-validator';
+jest.mock('../../models/user', () => ({
+  create: jest.fn(() => {
+    return {};
+  }),
+}));
 
-jest.mock("../../models/user", ()=>({
-  create: jest.fn(()=>{return {}})
-}))
+
 describe('validateRequest', () => {
-  beforeAll(()=>      {
-    process.env.JWT_KEY="secret"
-  })
-  // Let's assume there's a POST route in your application that uses the validateRequest middleware
-  it('should throw a RequestValidationError if validation fails', async () => {
-    const response = await request(app).post('/api/auth/signin').send({}) // Let's assume the route expects some data, and we're sending an empty object
+  let req: any, res: any, next: any;
 
-    expect(response.status).toBe(400) // Assuming your RequestValidationError sets the status code to 400
-    expect(response.body.errors).toBeDefined() // Assuming your error format includes an 'errors' property
-  })
+  beforeEach(() => {
+    req = { body: {} };
+    res = { status: jest.fn().mockReturnThis(), json: jest.fn() };
+    next = jest.fn();
+  });
+
+  beforeAll(() => {
+    process.env.JWT_KEY = 'secret';
+  });
 
   it('should not throw a RequestValidationError if validation is successful', async () => {
     const response = await request(app).post('/api/auth/signup').send({
-    password: 'passworD1!', username: '2'
-  }) // Replace with valid data for your route
+      password: 'passworD1!',
+      username: '2',
+    });
 
-    expect(response.status).not.toBe(400)
-    expect(response.body.errors).toBeUndefined()
-  })
-})
+    expect(response.status).not.toBe(400);
+    expect(response.body.errors).toBeUndefined();
+  });
+
+  it('should throw a RequestValidationError if validation fails', async () => {
+    const response = await request(app).post('/api/auth/signin').send({});
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors).toBeDefined();
+  });
+
+  it('calls next when there are no validation errors', () => {
+    validationResult(req).isEmpty = jest.fn().mockReturnValue(true);
+
+    validateRequest(req, res, next);
+
+    expect(next).toHaveBeenCalledTimes(1);
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).not.toHaveBeenCalled();
+  });
+});
