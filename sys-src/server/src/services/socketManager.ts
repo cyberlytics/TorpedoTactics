@@ -5,9 +5,9 @@ import { clientGameState } from '../types/clientGameState';
 import { PublicRoomData } from '../types/publicRoomData';
 import { SocketRoom } from '../types/socketRoom';
 import { Room } from './room';
-import { Battlefield } from '../types/battlefield';
+import { Battlefield, cellState } from '../types/battlefield';
 import { socketError } from '../types/socketError';
-import { /*endGame,*/ addGame } from './db';
+import { saveEndedGame, saveStartedGame } from './db';
 //import { read } from "fs";
 
 
@@ -35,9 +35,9 @@ export class SocketManager {
     // send rooms to new client
     socket.emit(SocketRoom.lobbyRoomsChanged, this.getLobbyData());
 
-    socket.on(SocketRoom.roomCreated, (roomId: string, userName: string) =>
-      this.createRoom(roomId, userName),
-    );
+    socket.on(SocketRoom.roomCreated, async (roomId: string, userName: string) => {
+      await this.createRoom(roomId, userName);
+    });
 
     socket.on(SocketRoom.roomJoined, (roomId: string, userName: string) =>
       this.joinRoom(socket, roomId, userName),
@@ -49,9 +49,9 @@ export class SocketManager {
         this.preparationCompleted(roomId, userName, battlefield),
     );
 
-    socket.on(SocketRoom.Shot, (roomId: string, userName: string, x: number, y: number) =>
-      this.Shot(roomId, userName, x, y),
-    );
+    socket.on(SocketRoom.Shot, async (roomId: string, userName: string, x: number, y: number) => {
+      await this.Shot(roomId, userName, x, y);
+    });
 
     socket.on(SocketRoom.disconnected, () => this.disconnectUser(socket.id));
 
@@ -128,7 +128,7 @@ export class SocketManager {
   }
 
   //starts the game
-  preparationCompleted(roomId: string, userName: string, battlefield: Battlefield) {
+  async preparationCompleted(roomId: string, userName: string, battlefield: Battlefield) {
     const room = this.rooms.find((room) => room.id == roomId);
     if (!room || room.ingame) {
       return;
@@ -157,13 +157,13 @@ export class SocketManager {
           .to(player.id)
           .emit(SocketRoom.gameStarted, room.currentPlayer?.name, enemyPlayer.name);
       });
-      addGame(room.players[0].name, room.players[1].name);
+      await saveStartedGame(room.players[0].name, room.players[1].name);
     }
   }
   
 
   //Receives a shot from a player
-  Shot(roomId: string, userName: string, x: number, y: number) {
+  async Shot(roomId: string, userName: string, x: number, y: number) {
     const room = this.rooms.find((room) => room.id == roomId)!;
     if (!room || !room.ingame || room.currentPlayer?.name != userName) {
       //Error Handling
@@ -180,7 +180,7 @@ export class SocketManager {
 
     //check if Game ended
     if (shotPlayer.battlefield.gameEnded()) {
-      this.endGame(shooterPlayer, shotPlayer);
+      await this.endGame(shooterPlayer, shotPlayer);
     }
 
     //Send shot to player who was shot
@@ -239,15 +239,17 @@ export class SocketManager {
     }
   }
 
-  endGame(winner : GameParticipant, looser : GameParticipant){
+  async endGame(winner : GameParticipant, looser : GameParticipant){
     console.log(looser.name + ' lost');
     console.log(winner.name + ' won');
     looser.state = clientGameState.lost;
     winner.state = clientGameState.won;
-    //endGame(winner.name, looser.name,winner.name, winner.battlefield.getamountCellState(cellState.shotShip), winner.battlefield.getamountCellState(cellState.shotShip), looser.name, looser.battlefield.getamountCellState(cellState.shotShip),looser.battlefield.getamountCellState(cellState.shotShip),winner.battlefield.getamountCellState(cellState.shotEmpty), looser.battlefield.getamountCellState(cellState.shotEmpty) );
-    
-    //save gamedata here to database
-    //you get hits and misses with player.battlefield.getAmountCellState(cellState.shotShip);
+    const hitsWinner: number = looser.battlefield.getamountCellState(cellState.shotShip);
+    const missesWinner : number = looser.battlefield.getamountCellState(cellState.shotEmpty);
+    const hitsLooser: number = winner.battlefield.getamountCellState(cellState.shotShip);
+    const misseslooser : number = winner.battlefield.getamountCellState(cellState.shotEmpty);
+
+    await saveEndedGame(winner.name, looser.name,winner.name,hitsWinner, hitsLooser, missesWinner, misseslooser);
   }
 
   getLobbyData() {
@@ -256,7 +258,6 @@ export class SocketManager {
       .filter((room) => !room.ingame)
       .map((room) => new PublicRoomData(room.id, room.name));
   }
-
 
   logRooms() {
     if (this.roomUpdateLog) {

@@ -21,9 +21,9 @@ export interface IGame {
 
 //schema Definition
 const gameSchema: Schema<IGame, IGameModel> = new Schema<IGame, IGameModel>({
-  playerid1: { type: Schema.Types.ObjectId, required: true, unique: true, ref: 'Player' },
-  playerid2: { type: Schema.Types.ObjectId, required: true, unique: true, ref: 'Player' },
-  winner: { type: Schema.Types.ObjectId, unique: true, ref: 'Player' },
+  playerid1: { type: Schema.Types.ObjectId, required: true, ref: 'Player' },
+  playerid2: { type: Schema.Types.ObjectId, required: true, ref: 'Player' },
+  winner: { type: Schema.Types.ObjectId, ref: 'Player' },
   state: { type: String, required: true, enum: Object.values(Gamestate) },
   started: { type: Number },
   ended: { type: Number },
@@ -57,7 +57,7 @@ gameSchema.statics.addGame = async function (
   const newGame: IGame = {
     playerid1: id1,
     playerid2: id2,
-    state: Gamestate.preparation,
+    state: Gamestate.running,
     started: Date.now(),
     hitsplayer1: 0,
     hitsplayer2: 0,
@@ -100,18 +100,19 @@ gameSchema.methods.changeState = async function (
 
 gameSchema.methods.endGame = async function (
   winnerid: Schema.Types.ObjectId,
-  hitsplayer1: number,
-  hitsplayer2: number,
-  missesplayer1: number,
-  missesplayer2: number,
+  hitswinner: number,
+  hitslooser: number,
+  misseswinner: number,
+  misseslooser: number,
 ): Promise<HydratedDocument<IGame, IGameMethods>> {
   this.winner = winnerid;
-  this.hitsplayer1 = hitsplayer1;
-  this.hitsplayer2 = hitsplayer2;
-  this.missesplayer1 = missesplayer1;
-  this.missesplayer2 = missesplayer2;
+  this.hitsplayer1 = hitswinner;
+  this.hitsplayer2 = hitslooser;
+  this.missesplayer1 = misseswinner;
+  this.missesplayer2 = misseslooser;
   this.ended = Date.now();
   this.state = Gamestate.terminated;
+  console.log("Game will be saved");
   return await this.save();
 };
 /*
@@ -120,4 +121,4 @@ gameSchema.methods.endGame = async function (
         - addGameMove  (playingfield[])
 */
 
-export const Game = mongoose.model<IGame>('Game', gameSchema);
+export const Game = mongoose.model<IGame, IGameModel>('Game', gameSchema);

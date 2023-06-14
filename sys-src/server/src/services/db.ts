@@ -5,7 +5,7 @@ import { Player, IPlayer } from "../models/player";
 
 
 
-export async function addGame(username1:string,username2:string) {
+export async function saveStartedGame(username1:string,username2:string) {
     const user1:HydratedDocument<IUser> = await User.getUserByName(username1);
     const user2:HydratedDocument<IUser> = await User.getUserByName(username2);
     const player1:HydratedDocument<IPlayer> |null = await Player.getPlayerbyUserId(user1.id);
@@ -14,11 +14,11 @@ export async function addGame(username1:string,username2:string) {
         return;
     }
 
-    Game.addGame(player1.id,player2.id);
+    await Game.addGame(player1.id,player2.id);
 
 }
 
-export async function endGame(username1:string,username2:string,winnername:string,hitsplayer1:number,hitsplayer2:number,missesplayer1:number,missesplayer2:number) {
+export async function saveEndedGame(username1:string,username2:string,winnername:string,hitswinner:number,hitslooser:number,misseswinner:number,misseslooser:number) {
     const user1:HydratedDocument<IUser> = await User.getUserByName(username1);
     const user2:HydratedDocument<IUser> = await User.getUserByName(username2);
     const player1:HydratedDocument<IPlayer> |null = await Player.getPlayerbyUserId(user1.id);
@@ -26,8 +26,9 @@ export async function endGame(username1:string,username2:string,winnername:strin
     if (player1 == null || player2 == null) {
         return;
     } 
-   const ActGame: HydratedDocument<IGame,IGameMethods> |null = await Game.getGamebyPlayers(player1.id,player2.id);
-    if (ActGame == null) {
+   const actGame: HydratedDocument<IGame,IGameMethods> |null = await Game.getGamebyPlayers(player1.id,player2.id);
+    if (actGame == null) {
+        console.log("Game not found");
         return;
     }
     let winnerid:Schema.Types.ObjectId;
@@ -37,9 +38,17 @@ export async function endGame(username1:string,username2:string,winnername:strin
     else {
         winnerid = player2.id;
     }
-   await ActGame.endGame (winnerid,hitsplayer1,hitsplayer2,missesplayer1,missesplayer2);
+   await actGame.endGame (winnerid,hitswinner,hitslooser,misseswinner,misseslooser);
 }
-// //timestamp fehlt eventuell? 
-// function updateplayerstats (id,hits,misses) {
+
+// function updatePlayer (id,hits,misses, gameid) {
+    //gameid ebenfalls hinzufügen
 //     Player.getPlayer(id).updateStats(hits,misses);
 // }
+
+
+
+/*Testuser in Datenbank erstellt, zum Testen
+        user1, pw1
+        user2, pw2
+*/
