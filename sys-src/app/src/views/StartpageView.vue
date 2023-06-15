@@ -1,57 +1,176 @@
 <template>
-  <div>
-    <h1>Startpage</h1>
-    <button @click="login()">Login</button>
-    <button @click="toggleRegisterField()">Register</button>
-
-    <div v-if="showRegisterField">
-      <h2>Register</h2>
-      <input v-model="username" placeholder="Username" />
-      <input v-model="password" placeholder="Password" type="password" />
-      <button @click="registerUser()">Bestätigen</button>
+  <div class="start-page">
+    <div class="vertical-center">
+      <h1>Willkommen bei Torpedo Tactics</h1>
+      <div class="auth-window">
+      <div class="auth-bar">
+        <button class="login-button" :class="{ active: !showRegisterForm }" @click="showRegisterForm = false">Login</button>
+        <button class="register-button" :class="{ active: showRegisterForm }" @click="showRegisterForm = true">Registrieren</button>
+      </div>
+        <form v-if="showRegisterForm" @submit.prevent="register" class="formfield" :class="{ active: showRegisterForm }">
+          <input type="text" v-model="registerData.name" placeholder="Name" required />
+          <input type="password" v-model="registerData.password" placeholder="Passwort" required />
+          <button class="enter-button" type="submit">Registrieren</button>
+        </form>
+        <form v-else @submit.prevent="login" class="formfield" :class="{ active: !showRegisterForm }">
+          <input type="text" v-model="loginData.name" placeholder="Name" required />
+          <input type="password" v-model="loginData.password" placeholder="Passwort" required />
+          <button class="enter-button" type="submit">Login</button>
+        </form>
+      </div>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import axios from 'axios';
-import { ref } from 'vue';
-
-const showRegisterField = ref(false);
-const username = ref('');
-const password = ref('');
-
-const login = () => {
-  // Implementiere hier deine Login-Logik
-  // z. B. Anzeigen eines Login-Modals oder Weiterleitung zur Login-Seite
-};
-
-const toggleRegisterField = () => {
-  showRegisterField.value = !showRegisterField.value;
-};
-
-const registerUser = async () => {
-  try {
-    const newUser = {
-      username: username.value,
-      password: password.value
+<script>
+export default {
+  data() {
+    return {
+      registerData: {
+        name: '',
+        password: ''
+      },
+      loginData: {
+        name: '',
+        password: ''
+      },
+      showRegisterForm: false
     };
+  },
+  methods: {
+    register() {
+      // Implementieren Sie den POST-Request an Ihren Server für die Registrierung
+      // Verwenden Sie this.registerData.name und this.registerData.password, um die Daten zu senden
 
-    // REST-Aufruf an deine Express-App, um einen Benutzer zu registrieren
-    const response = await axios.post('http://deine-express-app-url/register', newUser);
-    console.log(response.data); // Hier kannst du die Antwort der Express-App verarbeiten
+      // Beispiel für einen API-Aufruf mit axios:
+      // axios.post('/api/register', {
+      //   name: this.registerData.name,
+      //   password: this.registerData.password
+      // })
+      // .then(response => {
+      //   // Hier können Sie die entsprechende Logik für die erfolgreiche Registrierung implementieren
+      // })
+      // .catch(error => {
+      //   // Hier können Sie die entsprechende Fehlerbehandlung implementieren
+      // });
+    },
+    login() {
+      // Implementieren Sie den POST-Request an Ihren Server für den Login
+      // Verwenden Sie this.loginData.name und this.loginData.password, um die Daten zu senden
 
-    // Setze die Eingabefelder zurück
-    username.value = '';
-    password.value = '';
-
-    // Implementiere hier die entsprechende Logik nach erfolgreicher Registrierung
-    // z. B. Anzeigen einer Erfolgsmeldung oder Weiterleitung zur Startseite
-
-  } catch (error) {
-    console.error(error);
-    // Implementiere hier die entsprechende Fehlerbehandlung
-    // z. B. Anzeigen einer Fehlermeldung
+      // Beispiel für einen API-Aufruf mit axios:
+      // axios.post('/api/login', {
+      //   name: this.loginData.name,
+      //   password: this.loginData.password
+      // })
+      // .then(response => {
+      //   // Überprüfen Sie die Antwort vom Server und leiten Sie bei Erfolg zur Lobby weiter
+      //   if (response.data.success) {
+      //     this.$router.push('/lobby');
+      //   } else {
+      //     // Hier können Sie die entsprechende Logik für einen fehlgeschlagenen Login implementieren
+      //   }
+      // })
+      // .catch(error => {
+      //   // Hier können Sie die entsprechende Fehlerbehandlung implementieren
+      // });
+    }
   }
 };
 </script>
+
+<style scoped>
+.start-page {
+  text-align: center;
+  margin-top: 100px;
+  background-image: url(../assets/startpage-background.jpg);
+  background-size: cover;
+  color: black;
+  margin-top: 0;
+  height: 90vh;
+}
+
+h1 {
+  margin-top: 0;
+  padding-top: 100px;
+  font-size: 48px;
+}
+
+input[type="text"],
+input[type="password"] {
+  padding: 5px;
+  margin: 5px;
+}
+
+button {
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: rgb(111, 111, 111);
+}
+
+.auth-bar {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 5px;
+}
+
+.login-button {
+  background-color: lightgray;
+  color: black;
+  width: 130px;
+  height: 28px;
+  border-radius: 10px;
+}
+
+.register-button {
+  background-color: lightgray;
+  height: 28px;
+  width: 130px;
+  color: black;
+  border-radius: 10px;
+}
+
+.auth-window {
+  background-color: lightgray;
+  height: auto;
+  width: 300px;
+  margin: auto;
+  border-radius: 10px;
+  border: 1px solid black;
+}
+
+.active {
+  background-color: darkgrey;
+  color: black solid #000;;
+}
+
+.formfield {
+  display: flex;
+  flex-direction: column;
+  height: auto;
+  padding-top: 10px;
+  margin-top: 5px;
+  border-radius: 10px;
+}
+
+.enter-button{
+  background-color: rgb(143, 141, 141);
+  color: black;
+  width: 130px;
+  height: 28px;
+  margin: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+.vertical-center{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: 60vh;
+
+}
+
+</style>

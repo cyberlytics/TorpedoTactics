@@ -18,6 +18,7 @@ svg {
 }
 
 nav {
+  height: 10vh;
   width: 100%;
   font-size: 1rem;
   text-align: center;
