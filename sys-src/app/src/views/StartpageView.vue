@@ -39,9 +39,11 @@ export default {
   },
   methods: {
     register() {
-
+      this.$router.push('/home');
     },
     login() {
+      this.$router.push('/home');
+
       // axios.post('/api/login', {
       //   name: this.loginData.name,
       //   password: this.loginData.password
