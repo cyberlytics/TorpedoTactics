@@ -39,40 +39,23 @@ export default {
   },
   methods: {
     register() {
-      // Implementieren Sie den POST-Request an Ihren Server für die Registrierung
-      // Verwenden Sie this.registerData.name und this.registerData.password, um die Daten zu senden
 
-      // Beispiel für einen API-Aufruf mit axios:
-      // axios.post('/api/register', {
-      //   name: this.registerData.name,
-      //   password: this.registerData.password
-      // })
-      // .then(response => {
-      //   // Hier können Sie die entsprechende Logik für die erfolgreiche Registrierung implementieren
-      // })
-      // .catch(error => {
-      //   // Hier können Sie die entsprechende Fehlerbehandlung implementieren
-      // });
     },
     login() {
-      // Implementieren Sie den POST-Request an Ihren Server für den Login
-      // Verwenden Sie this.loginData.name und this.loginData.password, um die Daten zu senden
-
-      // Beispiel für einen API-Aufruf mit axios:
       // axios.post('/api/login', {
       //   name: this.loginData.name,
       //   password: this.loginData.password
       // })
       // .then(response => {
-      //   // Überprüfen Sie die Antwort vom Server und leiten Sie bei Erfolg zur Lobby weiter
+      //   // Überprüfen der Antwort vom Server und weiterleitung
       //   if (response.data.success) {
       //     this.$router.push('/lobby');
       //   } else {
-      //     // Hier können Sie die entsprechende Logik für einen fehlgeschlagenen Login implementieren
+      //     // Hier kann der entsprechende Logik für einen fehlgeschlagenen Login implementiert werden
       //   }
       // })
       // .catch(error => {
-      //   // Hier können Sie die entsprechende Fehlerbehandlung implementieren
+      //   // Fehlerbehandlung
       // });
     }
   }
@@ -80,97 +63,96 @@ export default {
 </script>
 
 <style scoped>
-.start-page {
-  text-align: center;
-  margin-top: 100px;
-  background-image: url(../assets/startpage-background.jpg);
-  background-size: cover;
-  color: black;
-  margin-top: 0;
-  height: 90vh;
-}
+  .start-page {
+    text-align: center;
+    margin-top: 100px;
+    background-image: url(../assets/startpage-background.jpg);
+    background-size: cover;
+    color: black;
+    margin-top: 0;
+    height: 90vh;
+  }
 
-h1 {
-  margin-top: 0;
-  padding-top: 100px;
-  font-size: 48px;
-}
+  h1 {
+    margin-top: 0;
+    padding-top: 100px;
+    font-size: 48px;
+  }
 
-input[type="text"],
-input[type="password"] {
-  padding: 5px;
-  margin: 5px;
-}
+  input[type="text"],
+  input[type="password"] {
+    padding: 5px;
+    margin: 5px;
+  }
 
-button {
-  border: none;
-  cursor: pointer;
-}
+  button {
+    border: none;
+    cursor: pointer;
+  }
 
-button:hover {
-  background-color: rgb(111, 111, 111);
-}
+  button:hover {
+    background-color: rgb(111, 111, 111);
+  }
 
-.auth-bar {
-  display: flex;
-  justify-content: space-evenly;
-  margin-top: 5px;
-}
+  .auth-bar {
+    display: flex;
+    justify-content: space-evenly;
+    margin-top: 5px;
+  }
 
-.login-button {
-  background-color: lightgray;
-  color: black;
-  width: 130px;
-  height: 28px;
-  border-radius: 10px;
-}
+  .login-button {
+    background-color: lightgray;
+    color: black;
+    width: 130px;
+    height: 28px;
+    border-radius: 10px;
+  }
 
-.register-button {
-  background-color: lightgray;
-  height: 28px;
-  width: 130px;
-  color: black;
-  border-radius: 10px;
-}
+  .register-button {
+    background-color: lightgray;
+    height: 28px;
+    width: 130px;
+    color: black;
+    border-radius: 10px;
+  }
 
-.auth-window {
-  background-color: lightgray;
-  height: auto;
-  width: 300px;
-  margin: auto;
-  border-radius: 10px;
-  border: 1px solid black;
-}
+  .auth-window {
+    background-color: lightgray;
+    height: auto;
+    width: 300px;
+    margin: auto;
+    border-radius: 10px;
+    border: 1px solid black;
+  }
 
-.active {
-  background-color: darkgrey;
-  color: black solid #000;;
-}
+  .active {
+    background-color: darkgrey;
+    color: black solid #000;;
+  }
 
-.formfield {
-  display: flex;
-  flex-direction: column;
-  height: auto;
-  padding-top: 10px;
-  margin-top: 5px;
-  border-radius: 10px;
-}
+  .formfield {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    padding-top: 10px;
+    margin-top: 5px;
+    border-radius: 10px;
+  }
 
-.enter-button{
-  background-color: rgb(143, 141, 141);
-  color: black;
-  width: 130px;
-  height: 28px;
-  margin: auto;
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
-.vertical-center{
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  height: 60vh;
+  .enter-button{
+    background-color: rgb(143, 141, 141);
+    color: black;
+    width: 130px;
+    height: 28px;
+    margin: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+  .vertical-center{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    height: 60vh;
 
-}
-
+  }
 </style>
