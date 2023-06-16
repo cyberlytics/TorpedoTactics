@@ -1,7 +1,7 @@
 import mongoose, { Schema, Model, HydratedDocument } from 'mongoose';
 
 export enum Gamestate {
-  preparation = 'preparation',
+  //preparation = 'preparation',
   running = 'running',
   terminated = 'terminated',
   aborted = 'aborted',
@@ -35,7 +35,7 @@ const gameSchema: Schema<IGame, IGameModel> = new Schema<IGame, IGameModel>({
 
 //methods for e Game Instance (Document)
 export interface IGameMethods {
-  endGame(winnerid:Schema.Types.ObjectId,hitsplayer1:number,hitsplayer2:number,missesplayer1:number,missesplayer2:number): Promise<HydratedDocument<IGame, IGameMethods>>;
+  endGame(winnerid:Schema.Types.ObjectId,hitsplayer1:number,hitsplayer2:number,missesplayer1:number,missesplayer2:number, aborted:boolean): Promise<HydratedDocument<IGame, IGameMethods>>;
 }
 
 //methods on all Games
@@ -78,6 +78,7 @@ gameSchema.statics.getGame = async function (
 };
 
 
+//get the running Game by the Ids of the players
 gameSchema.statics.getGamebyPlayers = async function (playerid1:Schema.Types.ObjectId, playerid2:Schema.Types.ObjectId): Promise<HydratedDocument<IGame, IGameMethods> | null> {
 let gamebuffer:HydratedDocument<IGame, IGameMethods> |null = await this.findOne({playerid1:playerid1, playerid2:playerid2,state:Gamestate.running});
 if(gamebuffer!=null){
@@ -85,40 +86,45 @@ if(gamebuffer!=null){
 }
 else{
   return await this.findOne({playerid1:playerid2, playerid2:playerid1,state:Gamestate.running});
-  
 }
 };
 
 
 //instance methods
-gameSchema.methods.changeState = async function (
+/*gameSchema.methods.changeState = async function (
   newstate: Gamestate,
 ): Promise<HydratedDocument<IGame, IGameMethods>> {
   this.state = newstate;
   return await this.save();
-};
+};*/
 
+
+//save ended Game
 gameSchema.methods.endGame = async function (
   winnerid: Schema.Types.ObjectId,
   hitswinner: number,
   hitslooser: number,
   misseswinner: number,
   misseslooser: number,
+  aborted: boolean,
 ): Promise<HydratedDocument<IGame, IGameMethods>> {
   this.winner = winnerid;
-  this.hitsplayer1 = hitswinner;
-  this.hitsplayer2 = hitslooser;
-  this.missesplayer1 = misseswinner;
-  this.missesplayer2 = misseslooser;
+
+  //save hits and misses for the right player
+  if(winnerid == this.player1){
+    this.hitsplayer1 = hitswinner;
+    this.hitsplayer2 = hitslooser;
+    this.missesplayer1 = misseswinner;
+    this.missesplayer2 = misseslooser;
+  } else {
+    this.hitsplayer2 = hitswinner;
+    this.hitsplayer1 = hitslooser;
+    this.missesplayer2 = misseswinner;
+    this.missesplayer1 = misseslooser;
+  }
   this.ended = Date.now();
-  this.state = Gamestate.terminated;
-  console.log("Game will be saved");
+  this.state = aborted ? Gamestate.aborted : Gamestate.terminated
   return await this.save();
 };
-/*
-    Next instance Functions:
-        - gameEnded(winnerid, ended, state)
-        - addGameMove  (playingfield[])
-*/
 
 export const Game = mongoose.model<IGame, IGameModel>('Game', gameSchema);

@@ -76,7 +76,7 @@ export class SocketManager {
         const abortingPlayer : GameParticipant = joinedRoom.players.find(player => player.id == userId)!;
         //emit the aborted message to the other player
         this.io.to(abortedPlayer.id).emit(SocketRoom.errorThrown, socketError.aborted);
-        this.endGame(abortedPlayer, abortingPlayer);
+        this.endGame(abortedPlayer, abortingPlayer, true);
       }
       //leave the room
       this.leaveRoom(joinedRoom, userId);
@@ -180,7 +180,7 @@ export class SocketManager {
 
     //check if Game ended
     if (shotPlayer.battlefield.gameEnded()) {
-      await this.endGame(shooterPlayer, shotPlayer);
+      await this.endGame(shooterPlayer, shotPlayer, false);
     }
 
     //Send shot to player who was shot
@@ -239,7 +239,7 @@ export class SocketManager {
     }
   }
 
-  async endGame(winner : GameParticipant, looser : GameParticipant){
+  async endGame(winner : GameParticipant, looser : GameParticipant, aborted: boolean){
     console.log(looser.name + ' lost');
     console.log(winner.name + ' won');
     looser.state = clientGameState.lost;
@@ -249,7 +249,7 @@ export class SocketManager {
     const hitsLooser: number = winner.battlefield.getamountCellState(cellState.shotShip);
     const misseslooser : number = winner.battlefield.getamountCellState(cellState.shotEmpty);
 
-    await saveEndedGame(winner.name, looser.name,winner.name,hitsWinner, hitsLooser, missesWinner, misseslooser);
+    await saveEndedGame(winner.name, looser.name,winner.name,hitsWinner, hitsLooser, missesWinner, misseslooser, aborted);
   }
 
   getLobbyData() {

@@ -5,7 +5,7 @@ export interface IPlayer {
   stats: {
     gamesplayed: number;
     gameswon: number;
-    timespend: number;
+    timespend: number; //in ms 
     hits: number;
     misses: number;
   };
@@ -14,34 +14,42 @@ export interface IPlayer {
 
 export interface IPlayerMethods {
   updateStats(won: boolean,hits: number,misses: number,timespend: number)  : Promise<HydratedDocument<IPlayer, IPlayerMethods>>
+  addGame(gameid: Schema.Types.ObjectId) : Promise<HydratedDocument<IPlayer, IPlayerMethods>>
 }
 
 interface IPlayerModel extends Model<IPlayer, {}, IPlayerMethods> {
   getPlayers(): Promise<HydratedDocument<IPlayer, IPlayerMethods>[]>;
-  addPlayer(id:Schema.Types.ObjectId): Promise<HydratedDocument<IPlayer, IPlayerMethods>>;
+  addPlayer(userid:Schema.Types.ObjectId): Promise<HydratedDocument<IPlayer, IPlayerMethods>>;
+  getPlayer(id:Schema.Types.ObjectId): Promise<HydratedDocument<IPlayer, IPlayerMethods> | null>;
   getPlayerbyUserId(userid:Schema.Types.ObjectId): Promise<HydratedDocument<IPlayer, IPlayerMethods>|null>;
 }
 
 const playerSchema: Schema<IPlayer, IPlayerModel> = new Schema<IPlayer, IPlayerModel>({
-  userid: { type: Schema.Types.ObjectId, required: true,ref: 'User' }, //userid should be unique on production
+  userid: { type: Schema.Types.ObjectId, required: true,ref: 'User' }, 
   stats: { type: Object, required: true },
   games: [{ type: Schema.Types.ObjectId, ref: 'Game' }],
 });
 
 
+//static methods
+
 /**
  * Create a Player in Database
  * @returns Object of the create Player
  */
-playerSchema.statics.addPlayer = async function (id : Schema.Types.ObjectId): Promise<
+playerSchema.statics.addPlayer = async function (userid : Schema.Types.ObjectId): Promise<
   HydratedDocument<IPlayer, IPlayerMethods>
 > {
   const newPlayer: IPlayer = {
-    userid: id,
+    userid: userid,
     stats: { gamesplayed: 0, gameswon: 0, timespend: 0.0, hits: 0, misses: 0},
   };
   return await this.create(newPlayer);
 };
+
+playerSchema.statics.getPlayer = async function (id: Schema.Types.ObjectId) : Promise<HydratedDocument<IPlayer,IPlayerMethods> | null>{
+  return await this.findById(id);
+}
 
 /**
  * Get a list of all Players from Database
@@ -59,11 +67,14 @@ playerSchema.statics.getPlayerbyUserId = async function (userid:Schema.Types.Obj
   return await this.findOne({ userid: userid });
 };
 
+
+//instance methods
+
 playerSchema.methods.updateStats = async function (
-won: boolean,
-hits: number,
-misses: number,
-timespend: number,  
+  won: boolean,
+  hits: number,
+  misses: number,
+  timespend: number,  
 ): Promise<HydratedDocument<IPlayer, IPlayerMethods>> {
   this.stats.gamesplayed += 1;
   this.stats.misses += misses;
@@ -72,7 +83,14 @@ timespend: number,
   if (won) {
     this.stats.gameswon += 1;
   }
+  this.markModified('stats');
   return await this.save();
+  
 };
+
+playerSchema.methods.addGame = async function (gameid: Schema.Types.ObjectId) : Promise<HydratedDocument<IPlayer, IPlayerMethods>>{
+  this.games.push(gameid);
+  return await this.save();
+} 
 
 export const Player = mongoose.model<IPlayer, IPlayerModel>('Player', playerSchema);
