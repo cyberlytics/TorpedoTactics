@@ -45,6 +45,7 @@ import { SocketRoom } from '@/types/socketRoom';
 import { Battlefield, createEmptyGrid, cellState } from '@/types/battlefield';
 import { socketError } from '@/types/socketError';
 import { useFieldStore } from '@/stores/field';
+
 //#endregion imports
 
 const url = 'http://localhost:3000';
@@ -58,13 +59,15 @@ const userName = ref<string>(getRandomName());
 const enemyName = ref<string>();
 
 const battlefieldSize = 11;
-const amountShips = 30;
+const amountShips = 2;
 
 //true if its your turn to shoot
 let myTurn = ref<Boolean>(false);
 
 let myBattlefield = ref<Battlefield>();
 let enemyBattlefield = ref<Battlefield>();
+
+let timeoutId;
 
 window.onbeforeunload = (event) => endGame();
 
@@ -79,6 +82,7 @@ socket.on(SocketRoom.preparationStarted, ()=>{
 });*/
 
 socket.on(SocketRoom.gameStarted, (currentPlayerName: string, enemyPlayerName: string) => {
+  endTimer(); //from Game Preparation
   console.log('gamestarted');
   enemyName.value = enemyPlayerName;
 
@@ -92,6 +96,7 @@ socket.on(SocketRoom.gameStarted, (currentPlayerName: string, enemyPlayerName: s
     myTurn.value = false;
   }
   state.value = clientGameState.ingame;
+  startTimer();
 });
 
 //shot from enemy
@@ -102,6 +107,7 @@ socket.on(SocketRoom.receivedShot, (x: number, y: number) => {
     myBattlefield.value!.receiveShot(x, y);
     console.log('My new Battlefield value:' + myBattlefield.value?.grid);
 
+    endTimer();
     //checks if I have been defeated
     if (myBattlefield.value!.gameEnded()) {
       console.log('You ' + 'lost');
@@ -109,6 +115,7 @@ socket.on(SocketRoom.receivedShot, (x: number, y: number) => {
       //socket.disconnect();
     } else {
       myTurn.value = true;
+      startTimer();
     }
   }
 });
@@ -143,6 +150,7 @@ socket.on(SocketRoom.responsetoShot, (x: number, y: number, changedCell: cellSta
       //socket.disconnect();
     }
     myTurn.value = false;
+    startTimer();
   } else {
     console.error("Received Response, but it's not my turn");
     socket.emit(
@@ -174,19 +182,20 @@ function joinRoom(roomId: string) {
   state.value = clientGameState.preparation;
 
   socket.emit(SocketRoom.roomJoined, roomId, userName.value);
+  startTimer(); //until both players are configured
 }
 
 //starts the Game
 function completePreparation(battlefield: Battlefield) {
-    console.log("Preparation completed");
     myBattlefield.value = battlefield as Battlefield;
-    console.log('start game, my battlefield:' + myBattlefield.value.grid);
+    console.log('Preparation completed, my battlefield:' + myBattlefield.value.grid);
     state.value = clientGameState.prepared;
     socket.emit(SocketRoom.preparationCompleted, currentRoomId.value, userName.value, battlefield);
 }
 
 //needs to get x and y from Game.vue
 function shoot(x: number, y: number) {
+  endTimer();
   if (myTurn.value) {
     console.log('Shot at x: ' + x + ' y: ' + y);
     socket.emit(SocketRoom.Shot, currentRoomId.value, userName.value, x, y);
@@ -198,6 +207,43 @@ function shoot(x: number, y: number) {
       userName.value,
       socketError.gameSequenceError,
     );
+  }
+}
+
+function startTimer(){
+  let timeBeforeTimeout : number = 1000;
+  switch (state.value){
+    case(clientGameState.preparation):
+      timeBeforeTimeout *= 30;
+      break;
+    case(clientGameState.ingame):
+      timeBeforeTimeout *= 10;
+  }
+  timeoutId = setTimeout(timeout, timeBeforeTimeout);
+}
+
+function endTimer(){
+  clearTimeout(timeoutId);
+}
+
+function timeout(){
+  switch(state.value){
+    case(clientGameState.preparation):
+      console.log("Preparation Timeout, no other player is coming");
+      endGame();
+      break;
+    case(clientGameState.prepared):
+      console.log("Preparation Timeout, no other player is coming");
+      endGame();
+      break;
+    case(clientGameState.ingame):
+      if(myTurn.value){
+        console.log("Timeout, I took to long to shot");
+        endGame();
+      } else{
+        console.log("Timeout, the other player took to long to shoot -> game will be aborted");
+      }
+      break;
   }
 }
 
