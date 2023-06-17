@@ -4,6 +4,11 @@ import { Battlefield, cellState } from '../../types/battlefield';
 
 let socketManager: SocketManager;
 
+// ToDo: add tests for
+// * joinRoom() on non existing or ingame room
+// * clientError()
+
+
 beforeEach(() => {
   socketManager = new SocketManager().initialize();
 });
@@ -17,12 +22,7 @@ describe('initialize', () => {
 describe('connectUser', () => {
   it('does not throw exception', () => {
     socketManager.userConnectionLog = true;
-    let socket = {
-      id: '1',
-      emit: () => {},
-      on: () => {},
-    };
-    expect(() => socketManager.connectUser(socket)).not.toThrow();
+    expect(() => socketManager.connectUser(getSocketMock())).not.toThrow();
   });
 });
 
@@ -50,7 +50,7 @@ describe('joinRoom', () => {
     let joinUserName = 'joinName';
 
     socketManager.createRoom(roomId, roomCreaterName);
-    socketManager.joinRoom({ id: joinUserId, join: () => {} }, roomId, joinUserName);
+    socketManager.joinRoom(getSocketMock(joinUserId), roomId, joinUserName);
 
     let room = socketManager.rooms[0];
     expect(room.playerCount()).toBe(1);
@@ -63,7 +63,7 @@ describe('leaveRoom', () => {
   it('removes user from joined room', () => {
     let userId = 'joinId';
     socketManager.createRoom('1', '1');
-    socketManager.joinRoom({ id: userId, join: () => {} }, '1', 'joinName');
+    socketManager.joinRoom(getSocketMock(userId), '1', 'joinName');
 
     let room = socketManager.rooms[0];
     expect(room.playerCount()).toBe(1);
@@ -77,7 +77,7 @@ describe('leaveRoom', () => {
   it('closes room if empty', () => {
     let userId = 'joinId';
     socketManager.createRoom('1', '1');
-    socketManager.joinRoom({ id: userId, join: () => {} }, '1', 'joinName');
+    socketManager.joinRoom(getSocketMock(userId), '1', 'joinName');
     socketManager.leaveRoom(socketManager.rooms[0], userId);
 
     expect(socketManager.rooms.length).toBe(0);
@@ -85,12 +85,12 @@ describe('leaveRoom', () => {
 });
 
 describe('disconnect', ()=> {
-  it('aborting correct handled', ()=>{
-    let userName1 = 'joinName1';
+    it('aborting correct handled', ()=>{
+  let userName1 = 'joinName1';
   let userName2 = 'joinName2';
   socketManager.createRoom('1', '1');
-  socketManager.joinRoom({ id: 'joinId1', join: () => {} }, '1', userName1);
-  socketManager.joinRoom({ id: 'joinId2', join: () => {} }, '1', userName2);
+  socketManager.joinRoom(getSocketMock('joinId1'), '1', userName1);
+  socketManager.joinRoom(getSocketMock('joinId2'), '1', userName2);
 
   let grid1: cellState[][] = Array.from({ length: 2 }, () =>
     Array.from({ length: 2 }, () => cellState.empty),
@@ -120,8 +120,8 @@ describe('getLobbyData', () => {
   it('only gets correct games', () => {
     // full room
     socketManager.createRoom('1', '1');
-    socketManager.joinRoom({ id: 'join1', join: () => {} }, '1', 'join1');
-    socketManager.joinRoom({ id: 'join2', join: () => {} }, '1', 'join2');
+    socketManager.joinRoom(getSocketMock(), '1', 'join1');
+    socketManager.joinRoom(getSocketMock(), '1', 'join2');
 
     // empty room
     socketManager.createRoom('2', '2');
@@ -144,8 +144,8 @@ describe('preparationCompleted', () => {
     let userId1 = 'joinId1';
     let userId2 = 'joinId2';
     socketManager.createRoom('1', '1');
-    socketManager.joinRoom({ id: userId1, join: () => {} }, '1', 'joinName1');
-    socketManager.joinRoom({ id: userId2, join: () => {} }, '1', 'joinName2');
+    socketManager.joinRoom(getSocketMock(userId1), '1', 'joinName1');
+    socketManager.joinRoom(getSocketMock(userId2), '1', 'joinName2');
 
     let grid: cellState[][] = Array.from({ length: 1 }, () =>
       Array.from({ length: 1 }, () => cellState.empty),
@@ -164,8 +164,8 @@ describe('preparationCompleted', () => {
     let userId1 = 'joinId1';
     let userId2 = 'joinId2';
     socketManager.createRoom('1', '1');
-    socketManager.joinRoom({ id: userId1, join: () => {} }, '1', 'joinName1');
-    socketManager.joinRoom({ id: userId2, join: () => {} }, '1', 'joinName2');
+    socketManager.joinRoom(getSocketMock(userId1), '1', 'joinName1');
+    socketManager.joinRoom(getSocketMock(userId2), '1', 'joinName2');
 
     let grid: cellState[][] = Array.from({ length: 1 }, () =>
       Array.from({ length: 1 }, () => cellState.empty),
@@ -186,8 +186,8 @@ describe('shot', () => {
     let userName1 = 'joinName1';
     let userName2 = 'joinName2';
     socketManager.createRoom('1', '1');
-    socketManager.joinRoom({ id: 'joinId1', join: () => {} }, '1', userName1);
-    socketManager.joinRoom({ id: 'joinId2', join: () => {} }, '1', userName2);
+    socketManager.joinRoom(getSocketMock('joinId1'), '1', userName1);
+    socketManager.joinRoom(getSocketMock('joinId2'), '1', userName2);
 
     let grid1: cellState[][] = Array.from({ length: 2 }, () =>
       Array.from({ length: 2 }, () => cellState.empty),
@@ -229,8 +229,8 @@ describe('shot', () => {
     let userName1 = 'joinName1';
     let userName2 = 'joinName2';
     socketManager.createRoom('1', '1');
-    socketManager.joinRoom({ id: 'joinId1', join: () => {} }, '1', userName1);
-    socketManager.joinRoom({ id: 'joinId2', join: () => {} }, '1', userName2);
+    socketManager.joinRoom(getSocketMock('joinId1'), '1', userName1);
+    socketManager.joinRoom(getSocketMock('joinId2'), '1', userName2);
 
     let grid1: cellState[][] = Array.from({ length: 2 }, () =>
       Array.from({ length: 2 }, () => cellState.empty),
@@ -255,3 +255,12 @@ describe('shot', () => {
     expect(player1?.state).toBe(clientGameState.won);
   });
 });
+
+function getSocketMock(id = '') {
+  return {
+      id: id,
+      join: () => {},
+      emit: () => {},
+      on: () => {}
+  };
+}
