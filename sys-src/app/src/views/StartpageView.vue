@@ -21,47 +21,44 @@
     </div>
   </div>
 </template>
+<script setup lang="ts">
+import { ref } from 'vue';
 
-<script>
-export default {
-  data() {
-    return {
-      registerData: {
-        name: '',
-        password: ''
-      },
-      loginData: {
-        name: '',
-        password: ''
-      },
-      showRegisterForm: false
-    };
-  },
-  methods: {
-    register() {
-      this.$router.push('/home');
-    },
-    login() {
-      this.$router.push('/home');
+const registerData = ref({
+  name: '',
+  password: ''
+});
+const loginData = ref({
+  name: '',
+  password: ''
+});
+const showRegisterForm = ref(false);
 
-      // axios.post('/api/login', {
-      //   name: this.loginData.name,
-      //   password: this.loginData.password
-      // })
-      // .then(response => {
-      //   // Überprüfen der Antwort vom Server und weiterleitung
-      //   if (response.data.success) {
-      //     this.$router.push('/lobby');
-      //   } else {
-      //     // Hier kann der entsprechende Logik für einen fehlgeschlagenen Login implementiert werden
-      //   }
-      // })
-      // .catch(error => {
-      //   // Fehlerbehandlung
-      // });
-    }
-  }
-};
+function register() {
+  // this.$router.push('/home');
+  // Replace this with your router logic
+}
+
+function login() {
+  // this.$router.push('/home');
+  // Replace this with your router logic
+
+  // axios.post('/api/login', {
+  //   name: loginData.value.name,
+  //   password: loginData.value.password
+  // })
+  // .then(response => {
+  //   // Überprüfen der Antwort vom Server und weiterleitung
+  //   if (response.data.success) {
+  //     this.$router.push('/lobby');
+  //   } else {
+  //     // Hier kann der entsprechende Logik für einen fehlgeschlagenen Login implementiert werden
+  //   }
+  // })
+  // .catch(error => {
+  //   // Fehlerbehandlung
+  // });
+}
 </script>
 
 <style scoped>
