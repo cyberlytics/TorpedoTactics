@@ -5,7 +5,7 @@
     class="ship"
     @mousedown="dragStart"
     @click="handleClick"
-    :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * 31 + 'px', height: '31px' }"
+    :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * shipBlockSize + 'px', height: `${shipBlockSize}px` }"
     :class="`${orientation !== 'h' ? 'vertical' : ''}`"
   ></div>
 </template>
@@ -26,6 +26,7 @@ export default {
   props: ['id', 'size', 'x', 'y'],
   data() {
     return {
+      shipBlockSize: 31,
       dragging: false,
       validatedPos: false,
       clicked: false,
@@ -132,8 +133,16 @@ export default {
       // stop if dragging is false
       if (!this.dragging) return
 
-      // check position on drag
-      this.checkPos(e.pageX, e.pageY)
+      // get coordinates of ship
+      let shipElement = document.getElementById(this.id)?.getBoundingClientRect();
+      if (shipElement == null) {
+        return;
+      }
+      // add half shipblock size to make grid snapping better
+      let shipLeft = shipElement.left + this.shipBlockSize / 2;
+      let shipTop = shipElement.top + this.shipBlockSize / 2;
+
+      this.checkPos(shipLeft, shipTop)
       this.pos.x = e.clientX + this.startPos.x
       this.pos.y = e.clientY + this.startPos.y
 
