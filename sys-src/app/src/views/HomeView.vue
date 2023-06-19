@@ -23,7 +23,7 @@ let firstBattlefieldConfirmed = ref<Boolean>(false);
 const store = useFieldStore();
 
 const ships = ref([
-  /*{ id: 'ship-1', size: 5, x: 0, y: 0},
+  { id: 'ship-1', size: 5, x: 0, y: 0},
   { id: 'ship-2', size: 4, x: 0, y: 0},
   { id: 'ship-3', size: 4, x: 0, y: 0},
   { id: 'ship-4', size: 3, x: 0, y: 0},
@@ -31,7 +31,7 @@ const ships = ref([
   { id: 'ship-6', size: 3, x: 0, y: 0},
   { id: 'ship-7', size: 2, x: 0, y: 0},
   { id: 'ship-8', size: 2, x: 0, y: 0},
-  { id: 'ship-9', size: 2, x: 0, y: 0},*/
+  { id: 'ship-9', size: 2, x: 0, y: 0},
   { id: 'ship-10', size: 2, x: 0, y: 0}
 ]);
 

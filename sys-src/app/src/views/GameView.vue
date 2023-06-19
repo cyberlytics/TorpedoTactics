@@ -3,6 +3,7 @@
     v-if="state === clientGameState.inlobby"
     :rooms="roomData"
     :userName="userName"
+    :serverAvailable="serverAvailable"
     @createRoom="createRoom"
     @joinRoom="joinRoom"
   />
@@ -29,6 +30,10 @@
     <p v-else>Sie haben gegen {{ enemyName }} verloren</p>
     <button @click="endGame()">Zur Lobby</button>
   </div>
+  <div v-if="state === clientGameState.timeout">
+    <p> Sie haben zu lange für die letzte Aktion gebraucht</p>
+    <button @click="state=clientGameState.inlobby">Zur Lobby</button>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -46,10 +51,13 @@ import { Battlefield, createEmptyGrid, cellState } from '@/types/battlefield';
 import { socketError } from '@/types/socketError';
 import { useFieldStore } from '@/stores/field';
 
-//#endregion imports
 
+//#endregion imports
 const url = 'http://localhost:3000';
 let socket = io(url);
+
+//server is available
+let serverAvailable = ref<boolean>(true);
 
 const roomData = ref<PublicRoomData[]>();
 const currentRoomId = ref<string>();
@@ -59,7 +67,7 @@ const userName = ref<string>(getRandomName());
 const enemyName = ref<string>();
 
 const battlefieldSize = 11;
-const amountShips = 2;
+const amountShips = 30;
 
 //true if its your turn to shoot
 let myTurn = ref<Boolean>(false);
@@ -68,18 +76,28 @@ let myBattlefield = ref<Battlefield>();
 let enemyBattlefield = ref<Battlefield>();
 
 let timeoutId;
+const preparationTimeout : number = 5 * 60 * 1000;
+const gameTimeout : number = 1 * 60 * 1000;
 
 window.onbeforeunload = (event) => endGame();
 
 //#region subscribe
+
+//if the client connects succesfully to the server
+socket.on('connect', ()=> {
+  serverAvailable.value = true;
+});
+
+//if there a connection error with the server
+socket.on('connect_error', ()=> {
+  console.error("Error");
+  endGame();
+  serverAvailable.value = false;
+});
+
 socket.on(SocketRoom.lobbyRoomsChanged, (openRooms: PublicRoomData[]) => {
   roomData.value = openRooms;
 });
-
-/*delete if not used later
-socket.on(SocketRoom.preparationStarted, ()=>{
-
-});*/
 
 socket.on(SocketRoom.gameStarted, (currentPlayerName: string, enemyPlayerName: string) => {
   endTimer(); //from Game Preparation
@@ -211,13 +229,13 @@ function shoot(x: number, y: number) {
 }
 
 function startTimer(){
-  let timeBeforeTimeout : number = 1000;
+  let timeBeforeTimeout : number = 0;
   switch (state.value){
     case(clientGameState.preparation):
-      timeBeforeTimeout *= 30;
+      timeBeforeTimeout = preparationTimeout;
       break;
     case(clientGameState.ingame):
-      timeBeforeTimeout *= 10;
+      timeBeforeTimeout = gameTimeout;
   }
   timeoutId = setTimeout(timeout, timeBeforeTimeout);
 }
@@ -231,15 +249,18 @@ function timeout(){
     case(clientGameState.preparation):
       console.log("Preparation Timeout, no other player is coming");
       endGame();
+      state.value =clientGameState.timeout;
       break;
     case(clientGameState.prepared):
       console.log("Preparation Timeout, no other player is coming");
       endGame();
+      state.value = clientGameState.timeout;
       break;
     case(clientGameState.ingame):
       if(myTurn.value){
         console.log("Timeout, I took to long to shot");
         endGame();
+        state.value = clientGameState.timeout;
       } else{
         console.log("Timeout, the other player took to long to shoot -> game will be aborted");
       }

@@ -4,5 +4,6 @@ export enum clientGameState{
     ingame,
     inlobby,
     won,
-    lost
+    lost, 
+    timeout
 }
