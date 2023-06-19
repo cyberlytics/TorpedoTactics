@@ -70,12 +70,12 @@ const battlefieldSize = 11;
 const amountShips = 30;
 
 //true if its your turn to shoot
-let myTurn = ref<Boolean>(false);
+let myTurn = ref<boolean>(false);
 
 let myBattlefield = ref<Battlefield>();
 let enemyBattlefield = ref<Battlefield>();
 
-let timeoutId;
+let timeoutId : number;
 const preparationTimeout : number = 5 * 60 * 1000;
 const gameTimeout : number = 1 * 60 * 1000;
 
@@ -237,7 +237,7 @@ function startTimer(){
     case(clientGameState.ingame):
       timeBeforeTimeout = gameTimeout;
   }
-  timeoutId = setTimeout(timeout, timeBeforeTimeout);
+  timeoutId = setTimeout(timeout, timeBeforeTimeout) as unknown as number;
 }
 
 function endTimer(){
