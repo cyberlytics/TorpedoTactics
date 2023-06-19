@@ -92,7 +92,6 @@ export default {
         
         // validate position
         if (validatePos(this.validPos.dataX, this.validPos.dataY, this.size, newOrientation)) {
-          console.log("rotate")
           // adjust orientation
           this.orientationHorizontal = newOrientation
 

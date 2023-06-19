@@ -4,7 +4,6 @@ import { useFieldStore } from '@/stores/field'
 export function onField(x: number, y: number) {
   const field = document.getElementById('game-field')
 
-  console.log(field)
   if (field) {
     const { x: posX, y: posY } = field.getBoundingClientRect()
 
