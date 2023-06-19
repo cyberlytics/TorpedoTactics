@@ -5,7 +5,8 @@
     class="ship"
     @mousedown="dragStart"
     @click="handleClick"
-    :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * shipBlockSize + 'px', height: `${shipBlockSize}px` }"
+    :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * shipBlockSize + 'px', height: `${shipBlockSize}px`,
+      '--rotation-translate': `-${getRotatedTranslateValues()}px ${getRotatedTranslateValues()}px` }"
     :class="`${orientationHorizontal ? '' : 'vertical'}`"
   ></div>
 </template>
@@ -73,6 +74,9 @@ export default {
     this.pos = getPos(this.$refs['ship'] as HTMLDivElement)
   },
   methods: {
+    getRotatedTranslateValues() {
+      return this.shipBlockSize * (this.size / 2 - 0.5);
+    },
     updatePosition(x, y) {
       this.pos = { x, y }
       this.draggingPos = { x, y }
@@ -115,10 +119,11 @@ export default {
 
           // show animation on invalid rotation
           window.clearTimeout(this.invalidRotateInterval); // clear previous timeout if clicked within the delay
-          shipElement.classList.add("invalid-rotate")
+          shipElement.classList.add(this.orientationHorizontal ? "invalid-rotate-horizontal" : "invalid-rotate-vertical")
           this.invalidRotateInterval = window.setTimeout(() => {
             // remove class afterwards
-            shipElement?.classList.remove("invalid-rotate");
+            shipElement?.classList.remove("invalid-rotate-horizontal");
+            shipElement?.classList.remove("invalid-rotate-vertical");
           }, 700);
         }
       }
@@ -260,20 +265,31 @@ export default {
 }
 
 .vertical {
-  transform-origin: 15px 15px;
+  translate: var(--rotation-translate);
   transform: rotate(90deg);
 }
 
-.invalid-rotate {
-  animation: wiggleAnimation 0.5s;
-  transform-origin: center;
+.invalid-rotate-horizontal {
+  animation: wiggleAnimationHorizontal 0.5s;
 }
-@keyframes wiggleAnimation {
+@keyframes wiggleAnimationHorizontal {
   0% { transform: rotate(0deg); background: lightcoral; }
   20% { transform: rotate(-3deg); }
   40% { transform: rotate(3deg); }
   60% { transform: rotate(-3deg); }
   80% { transform: rotate(3deg); }
   100% { transform: rotate(0deg); background: lightcoral; }
+}
+
+.invalid-rotate-vertical {
+  animation: wiggleAnimationVertical 0.5s;
+}
+@keyframes wiggleAnimationVertical {
+  0% { transform: rotate(90deg); background: lightcoral; }
+  20% { transform: rotate(87deg); }
+  40% { transform: rotate(93deg); }
+  60% { transform: rotate(87deg); }
+  80% { transform: rotate(93deg); }
+  100% { transform: rotate(90deg); background: lightcoral; }
 }
 </style>
