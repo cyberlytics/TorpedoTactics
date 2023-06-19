@@ -1,0 +1,17 @@
+Alle Asstes stammen von pexels.com und stehen nach derren Lizensvereinbarung Frei zur Verfügung.
+Siehe: https://www.pexels.com/de-DE/lizenz/
+
+Die Nennung der Fotograpfen geschieht an dieser Stelle freiwillig.
+Die Asstes sind unter folgenden Ordner abrufbar:
+C:\Users\feill\Documents\Programmieren\BCN-2023SS-TeamGruen-TorpedoTactics\sys-src\app\src\assets
+
+Das Foto mit dem Dateinamen "startpage-background.jpg":
+  Ursprung:
+    https://www.pexels.com/de-de/foto/meer-ozean-segeln-reise-13342949/
+
+  Fotograpf (Pexel Nickname):
+    germannavyphotograph
+    https://www.pexels.com/de-de/@germannavyphotograph-1195753/
+
+  Abrufdatum:
+    16.06.2023

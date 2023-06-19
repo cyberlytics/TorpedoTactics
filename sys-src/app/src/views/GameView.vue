@@ -21,7 +21,7 @@
     :myBattlefield="myBattlefield"
     :enemyBattlefield="enemyBattlefield"
     :state="state"
-    @shoot="shoot"   
+    @shoot="shoot"
     @endGame="endGame"
   />
   <div v-if="state === clientGameState.won || state === clientGameState.lost">
