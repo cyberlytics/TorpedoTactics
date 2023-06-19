@@ -6,7 +6,7 @@
     @mousedown="dragStart"
     @click="handleClick"
     :style="{ top: pos.y + 'px', left: pos.x + 'px', width: size * shipBlockSize + 'px', height: `${shipBlockSize}px` }"
-    :class="`${orientation !== 'h' ? 'vertical' : ''}`"
+    :class="`${orientationHorizontal ? '' : 'vertical'}`"
   ></div>
 </template>
 
@@ -31,19 +31,21 @@ export default {
       validatedPos: false,
       clicked: false,
       prevEle: [], // all marked elements
-      orientation: 'h', // horizontal or vertical
+      orientationHorizontal: true, // horizontal or vertical
+      placedOnField: false,
+      invalidRotateInterval: 0,
       // current position
       pos: {
         x: this.x || 0,
         y: this.y || 0
       },
       // need to be updated when dragging
-      startPos: {
+      draggingPos: {
         x: this.x || 0,
         y: this.y || 0
       },
 
-      // need to reset position
+      // needed for invalid dropoffs -> reset
       originPos: {
         x: this.x || 0,
         y: this.y || 0
@@ -73,24 +75,26 @@ export default {
   methods: {
     updatePosition(x, y) {
       this.pos = { x, y }
-      this.startPos = { x, y }
-      this.originPos = { x, y }
+      this.draggingPos = { x, y }
     },
     handleClick(e: any) {
       // this function handles the click event so that the ship can be dragged or rotated not both
-      if (!this.dragging && !this.clicked) {
+      if (!this.dragging
+        && !this.clicked
+        && this.placedOnField) { // don't try to rotate ship if not on field
         // on drag clean up store
         if (this.validPos.dataX !== null && this.validPos.dataY !== null) {
-          cleanUpStore(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
+          cleanUpStore(this.validPos.dataX, this.validPos.dataY, this.size, this.orientationHorizontal)
         }
 
         // change orientation
-        const newOrientation = this.orientation === 'h' ? 'v' : 'h'
-
+        const newOrientation = !this.orientationHorizontal;
+        
         // validate position
         if (validatePos(this.validPos.dataX, this.validPos.dataY, this.size, newOrientation)) {
+          console.log("rotate")
           // adjust orientation
-          this.orientation = newOrientation
+          this.orientationHorizontal = newOrientation
 
           // calculate new position and update it
           this.dragging = true
@@ -101,7 +105,22 @@ export default {
           // invalidate position
           this.validatedPos = false
           this.pos = { ...this.originPos }
-          this.startPos = { ...this.originPos }
+          this.draggingPos = { ...this.originPos }
+
+
+          // get ship html element
+          let shipElement = document.getElementById(this.id);
+          if (shipElement == null) {
+            return;
+          }
+
+          // show animation on invalid rotation
+          window.clearTimeout(this.invalidRotateInterval); // clear previous timeout if clicked within the delay
+          shipElement.classList.add("invalid-rotate")
+          this.invalidRotateInterval = window.setTimeout(() => {
+            // remove class afterwards
+            shipElement?.classList.remove("invalid-rotate");
+          }, 700);
         }
       }
 
@@ -112,9 +131,13 @@ export default {
       this.clicked = false
     },
     dragStart(e: any) {
+      // save originPos position for reset
+      this.originPos.x = this.pos.x
+      this.originPos.y = this.pos.y
+
       // adjust start position
-      this.startPos.x = this.pos.x - e.clientX
-      this.startPos.y = this.pos.y - e.clientY
+      this.draggingPos.x = this.pos.x - e.clientX
+      this.draggingPos.y = this.pos.y - e.clientY
 
       // set flags
       this.dragging = true
@@ -126,7 +149,7 @@ export default {
 
       // on drag clean up store
       if (this.validPos.dataX !== null && this.validPos.dataY !== null) {
-        cleanUpStore(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
+        cleanUpStore(this.validPos.dataX, this.validPos.dataY, this.size, this.orientationHorizontal)
       }
     },
     drag(e: any) {
@@ -143,8 +166,8 @@ export default {
       let shipTop = shipElement.top + this.shipBlockSize / 2;
 
       this.checkPos(shipLeft, shipTop)
-      this.pos.x = e.clientX + this.startPos.x
-      this.pos.y = e.clientY + this.startPos.y
+      this.pos.x = e.clientX + this.draggingPos.x
+      this.pos.y = e.clientY + this.draggingPos.y
 
       // set click flag
       this.clicked = true
@@ -158,7 +181,8 @@ export default {
 
       // save positions into store
       if (this.validatedPos) {
-        savePositions(this.validPos.dataX, this.validPos.dataY, this.size, this.orientation)
+        savePositions(this.validPos.dataX, this.validPos.dataY, this.size, this.orientationHorizontal)
+        this.placedOnField = true;
       }
 
       // remove global listeners
@@ -170,7 +194,7 @@ export default {
       cleanUpElements(this.prevEle)
 
       // get new elements
-      this.prevEle = markElements(x, y, this.size, this.orientation)
+      this.prevEle = markElements(x, y, this.size, this.orientationHorizontal)
 
       // mark elements
       this.prevEle.forEach((ele) => {
@@ -191,7 +215,7 @@ export default {
           Number(ele.getAttribute('data-x')),
           Number(ele.getAttribute('data-y')),
           this.size,
-          this.orientation
+          this.orientationHorizontal
         )
       ) {
         // set position as valid
@@ -201,7 +225,7 @@ export default {
         const { top, left } = ele.getBoundingClientRect()
         const navHeight = 65
         this.validPos = {
-          x: this.orientation === 'h' ? left + 1.5 : left + 2.5,
+          x: this.orientationHorizontal ? left + 1.5 : left + 2.5,
           y: top - navHeight + 1.5,
           dataX: Number(ele.getAttribute('data-x')),
           dataY: Number(ele.getAttribute('data-y'))
@@ -239,5 +263,18 @@ export default {
 .vertical {
   transform-origin: 15px 15px;
   transform: rotate(90deg);
+}
+
+.invalid-rotate {
+  animation: wiggleAnimation 0.5s;
+  transform-origin: center;
+}
+@keyframes wiggleAnimation {
+  0% { transform: rotate(0deg); background: lightcoral; }
+  20% { transform: rotate(-3deg); }
+  40% { transform: rotate(3deg); }
+  60% { transform: rotate(-3deg); }
+  80% { transform: rotate(3deg); }
+  100% { transform: rotate(0deg); background: lightcoral; }
 }
 </style>
