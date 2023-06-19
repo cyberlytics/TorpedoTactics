@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="serverAvailable">
     <h3>{{ userName }}</h3>
     <hr />
     <br />
@@ -19,6 +19,9 @@
       </li>
     </ul>
   </div>
+  <div v-else>
+    Keine Serververbindung möglich
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -29,6 +32,7 @@ import type { PublicRoomData } from '@/types/publicRoomData';
 const props = defineProps({
   rooms: Array<PublicRoomData>,
   userName: String,
+  serverAvailable: Boolean,
 });
 const emit = defineEmits(['createRoom', 'joinRoom','abort']);
 
