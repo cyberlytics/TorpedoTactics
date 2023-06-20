@@ -70,7 +70,7 @@ const battlefieldSize = 11;
 const amountShips = 30;
 
 //true if its your turn to shoot
-let myTurn = ref<Boolean>(false);
+let myTurn = ref<boolean>(false);
 
 let myBattlefield = ref<Battlefield>();
 let enemyBattlefield = ref<Battlefield>();

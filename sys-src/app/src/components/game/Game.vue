@@ -17,7 +17,7 @@
 <script setup lang="ts">
 //#region imports
 import { defineComponent, ref } from 'vue';
-import { Battlefield, cellState, createGrid } from '@/types/battlefield';
+import { Battlefield } from '@/types/battlefield';
 import Game from '@/components/Game-Field.vue'; 
 
 //#endregion imports
