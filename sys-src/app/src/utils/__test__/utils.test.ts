@@ -81,7 +81,7 @@ describe('utils', () => {
         size = 3
 
       // call setPos
-      savePositions(x, y, size, 'h')
+      savePositions(x, y, size, true)
 
       expect(setPos).toHaveBeenCalledTimes(size)
       expect(setPos).toHaveBeenNthCalledWith(1, x, y)
@@ -101,7 +101,7 @@ describe('utils', () => {
         size = 3
 
       // call setPos
-      savePositions(x, y, size, 'v')
+      savePositions(x, y, size, false)
 
       expect(setPos).toHaveBeenCalledTimes(size)
       expect(setPos).toHaveBeenNthCalledWith(1, x, y)
@@ -118,7 +118,7 @@ describe('utils', () => {
       const x = 5,
         y = 7,
         size = 3
-      cleanUpStore(x, y, size, 'h')
+      cleanUpStore(x, y, size, true)
 
       expect(removePos).toHaveBeenCalledTimes(size)
       expect(removePos).toHaveBeenNthCalledWith(1, x, y)
@@ -133,7 +133,7 @@ describe('utils', () => {
       const x = 5,
         y = 7,
         size = 3
-      cleanUpStore(x, y, size, 'v')
+      cleanUpStore(x, y, size, false)
 
       expect(removePos).toHaveBeenCalledTimes(size)
       expect(removePos).toHaveBeenNthCalledWith(1, x, y)
@@ -153,28 +153,28 @@ describe('utils', () => {
         field: [{ x: 5, y: 5 }]
       })
 
-      const result = validatePos(5, 5, 1, 'h')
+      const result = validatePos(5, 5, 1, true)
       expect(result).toBe(false)
     })
 
     it('returns false when horizontal ship is out of bounds', () => {
       ;(useFieldStore as any).mockReturnValue({ field: [] })
 
-      const result = validatePos(10, 5, 2, 'h')
+      const result = validatePos(10, 5, 2, true)
       expect(result).toBe(false)
     })
 
     it('returns false when vertical ship is out of bounds', () => {
       ;(useFieldStore as any).mockReturnValue({ field: [] })
 
-      const result = validatePos(5, 10, 2, 'v')
+      const result = validatePos(5, 10, 2, false)
       expect(result).toBe(false)
     })
 
     it('returns true when position is valid', () => {
       ;(useFieldStore as any).mockReturnValue({ field: [] })
 
-      const result = validatePos(5, 5, 1, 'h')
+      const result = validatePos(5, 5, 1, true)
       expect(result).toBe(true)
     })
   })

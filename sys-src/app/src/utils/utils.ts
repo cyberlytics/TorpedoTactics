@@ -20,11 +20,11 @@ export function onField(x: number, y: number) {
 }
 
 // save position of ship in game field
-export function savePositions(x: number, y: number, size: number, orientation: string) {
+export function savePositions(x: number, y: number, size: number, orientationHorizontal: boolean) {
   const store = useFieldStore() // Use the store
 
   for (let i = 0; i < size; i++) {
-    if (orientation === 'h') {
+    if (orientationHorizontal) {
       store.setPos(x + i, y)
     } else {
       store.setPos(x, y + i)
@@ -33,11 +33,11 @@ export function savePositions(x: number, y: number, size: number, orientation: s
 }
 
 // remove position of ship inside the game field store
-export function cleanUpStore(x: number, y: number, size: number, orientation: string) {
+export function cleanUpStore(x: number, y: number, size: number, orientationHorizontal: boolean) {
   const store = useFieldStore() // Use the store
 
   for (let i = 0; i < size; i++) {
-    if (orientation === 'h') {
+    if (orientationHorizontal) {
       store.removePos(x + i, y)
     } else {
       store.removePos(x, y + i)
@@ -46,13 +46,13 @@ export function cleanUpStore(x: number, y: number, size: number, orientation: st
 }
 
 // check if passed position is valid
-export function validatePos(x: number, y: number, size: number, orientation: string): boolean {
+export function validatePos(x: number, y: number, size: number, orientationHorizontal: boolean): boolean {
   const store = useFieldStore() // Use the store
 
   // Check if new position conflicts with any existing positions
   let isConflict = false
   for (let i = 0; i < size; i++) {
-    if (orientation === 'h') {
+    if (orientationHorizontal) {
       isConflict = store.field.some((pos: any) => pos.x === x + i && pos.y === y)
     } else {
       isConflict = store.field.some((pos: any) => pos.x === x && pos.y === y + i)
@@ -60,9 +60,9 @@ export function validatePos(x: number, y: number, size: number, orientation: str
     if (isConflict) return false
   }
 
-  if (orientation === 'h' && x + size > 11) {
+  if (orientationHorizontal && x + size > 11) {
     return false
-  } else if (orientation === 'v' && y + size > 11) {
+  } else if (!orientationHorizontal && y + size > 11) {
     return false
   } else return true
 }
@@ -96,10 +96,10 @@ export function markElements(
   x: number,
   y: number,
   size: number,
-  orientation: string
+  orientationHorizontal: boolean
 ): HTMLElement[] {
   const eles = []
-  if (orientation === 'h') {
+  if (orientationHorizontal) {
     for (let i = 0; i < size; i++) {
       eles.push(document.querySelector(`[data-x="${x + i}"][data-y="${y}"]`))
     }
