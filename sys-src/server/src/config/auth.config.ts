@@ -9,6 +9,4 @@ export const EMAIL_CHANGE_INTERVAL = 900; // 15 minutes after login
 /**
  *  Pattern for atleast one uppercase, one lowercase and one digit
  */
-export const passwordRegex = new RegExp(
-  /^(?=.*?[\p{Lu}])(?=.*?[\p{Ll}])(?=.*?\d).*$/u
-);
+export const passwordRegex = new RegExp(/^(?=.*?[\p{Lu}])(?=.*?[\p{Ll}])(?=.*?\d).*$/u);

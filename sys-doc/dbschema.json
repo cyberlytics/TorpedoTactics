@@ -1,0 +1,37 @@
+//user
+{
+    "_id": int,
+    "username": string,
+    "password": string
+}
+
+//player
+//games saves the last 10 games
+{
+    "_id": int,
+    "userid": int,
+    "statistics":{
+        "gamesplayed": int,
+        "gameswon": int,
+        "timespend": long,
+        "hitmissrate": double,
+    },
+    "games": [game_id1, game_id2, ..., game_id10]
+}
+
+//game
+{
+    "_id": int,
+    "state": int,
+    "playerid1": int,
+    "playerid2": int,
+    "winner": int, //Id des Gewinners
+    "aborted": int, //default 0, id from player who aborted
+    "started": timestamp,
+    "ended": timestamp,
+    //shows an array of each playground for every step of the game
+    "gamehistory": [playground1, playground2, playground1, playground2,..]
+}
+
+
+//Für user, player, game wird eine Model erstellt

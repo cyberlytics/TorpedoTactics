@@ -10,7 +10,7 @@ export class Password {
     const salt = await bcrypt.genSalt(BCRYPT_WORK_FACTOR);
     const hash = await bcrypt.hash(password, salt);
 
-    return hash;
+    return hash; // has to be stored in the database for later comparison -> login password has to be hashed and compared to the stored hashed password
   }
 
   /**
@@ -19,8 +19,8 @@ export class Password {
    * @returns {Promise} A promise to be either resolved with the comparison result salt or rejected with an Error
    */
   static async compare(
-    storedPassword: string,
-    suppliedPassword: string
+    storedPassword: string, // hashed password
+    suppliedPassword: string, // hashed password
   ): Promise<boolean> {
     return bcrypt.compare(suppliedPassword, storedPassword);
   }
