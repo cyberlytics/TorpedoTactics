@@ -38,7 +38,7 @@
 
 <script setup lang="ts">
 //#region imports
-import { ref } from 'vue';
+import q{ ref } from 'vue';
 import { io } from 'socket.io-client';
 import Lobby from '../components/game/Lobby.vue';
 import Preparation from '@/views/HomeView.vue'
@@ -70,7 +70,7 @@ const battlefieldSize = 11;
 const amountShips = 30;
 
 //true if its your turn to shoot
-let myTurn = ref<Boolean>(false);
+let myTurn = ref<boolean>(false);
 
 let myBattlefield = ref<Battlefield>();
 let enemyBattlefield = ref<Battlefield>();
