@@ -75,7 +75,7 @@ let myTurn = ref<boolean>(false);
 let myBattlefield = ref<Battlefield>();
 let enemyBattlefield = ref<Battlefield>();
 
-let timeoutId : number;
+let timeoutId;
 const preparationTimeout : number = 5 * 60 * 1000;
 const gameTimeout : number = 1 * 60 * 1000;
 
@@ -237,7 +237,7 @@ function startTimer(){
     case(clientGameState.ingame):
       timeBeforeTimeout = gameTimeout;
   }
-  timeoutId = setTimeout(timeout, timeBeforeTimeout) as unknown as number;
+  timeoutId = setTimeout(timeout, timeBeforeTimeout);
 }
 
 function endTimer(){
