@@ -4,6 +4,7 @@
     :rooms="roomData"
     :userName="userName"
     :serverAvailable="serverAvailable"
+    :serverAdr="serverAdr"
     @createRoom="createRoom"
     @joinRoom="joinRoom"
   />
@@ -38,7 +39,7 @@
 
 <script setup lang="ts">
 //#region imports
-import q{ ref } from 'vue';
+import { ref } from 'vue';
 import { io } from 'socket.io-client';
 import Lobby from '../components/game/Lobby.vue';
 import Preparation from '@/views/HomeView.vue'
@@ -53,7 +54,8 @@ import { useFieldStore } from '@/stores/field';
 
 
 //#endregion imports
-const url = 'http://localhost:3000';
+const serverAdr = ref<string>("localhost:3000");
+const url = 'http://'+serverAdr.value;
 let socket = io(url);
 
 //server is available
