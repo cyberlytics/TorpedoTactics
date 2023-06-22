@@ -1,0 +1,2 @@
+Das waren meine ersten Versuche Statistiken auszulesen und anzuzeigen
+-Timon Spichtinger
