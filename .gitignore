@@ -3,10 +3,12 @@ concept.fdb_latexmk
 concept.fls
 concept.log
 concept.synctex.gz
-
-
 yarn.lock
 .yarnclean
+
+# My Own files to ignore (don't touch)
+docker_run.txt
+gitinspector.html
 
 # compiled output
 /dist
