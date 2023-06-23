@@ -1,40 +1,52 @@
 import { saveStartedGame } from '../db';
+import { saveEndedGame } from '../db';
 
 // model
 import {User} from '../../models/user';
 import { Player } from '../../models/player';
+import { Game } from '../../models/game';
 
-
-// mocks    
-
-// Create a mock function for mongoose.connect
-// mongoose.connect = jest.fn()
-// jest.mock('../../model/User', () => ({
-//     getUserByName: jest.fn(),
-//     getgetPlayerbyUserId: jest.fn(),
-//     findOne: jest.fn(),
-//     create: jest.fn()
-// }))
-
-describe('testTest', () => {
+describe('saveStartedGame', () => {
     it('test', async () => {
-        const mockGetUserByName  = jest.fn().mockResolvedValue(null);
- jest.spyOn(User, 'getUserByName').mockImplementation(mockGetUserByName);
+    const mockGetUserByName  = jest.fn().mockResolvedValue(null);
+    jest.spyOn(User, 'getUserByName').mockImplementation(mockGetUserByName);
 
- const mockPlayerbyUserId  = jest.fn().mockResolvedValue(null);
- jest.spyOn(Player, 'getPlayerbyUserId').mockImplementation(mockPlayerbyUserId);
+    const mockPlayerbyUserId  = jest.fn().mockResolvedValue(null);
+    jest.spyOn(Player, 'getPlayerbyUserId').mockImplementation(mockPlayerbyUserId);
+    
 
- await saveStartedGame('username1', 'username2');
- 
- 
-        
+    //mocks für player1 und player2
+    const mockAddGame = jest.fn().mockResolvedValue(null);
+    jest.spyOn(Game, 'addGame').mockImplementation(mockAddGame);
+
+    await saveStartedGame('username1', 'username2');    
     // Überprüfen, ob die erwarteten Funktionen aufgerufen wurden
     expect(mockGetUserByName).toHaveBeenCalledTimes(2);
     expect(mockPlayerbyUserId).toHaveBeenCalledTimes(0);
-    // Aufruf der Funktion mit den erwarteten Parametern
+    expect(mockAddGame).toHaveBeenCalledTimes(0);    
  })
+})
 
- 
-
+describe('saveEndedGame', () => {  
+    it('test', async () => {
+        const mockGetUserByName  = jest.fn().mockResolvedValue(null);
+        jest.spyOn(User, 'getUserByName').mockImplementation(mockGetUserByName);
+    
+        const mockPlayerbyUserId  = jest.fn().mockResolvedValue(null);
+        jest.spyOn(Player, 'getPlayerbyUserId').mockImplementation(mockPlayerbyUserId);
+        
+        const mockGetGamebyPlayers  = jest.fn().mockResolvedValue(null);
+        jest.spyOn(Game, 'getGamebyPlayers').mockImplementation(mockGetGamebyPlayers);
+    
+        const mockEndGame = jest.fn().mockResolvedValue(null);
+        jest.spyOn(Game, 'addGame').mockImplementation(mockEndGame);
+    
+        await saveEndedGame('username1', 'username2', 'winnername', 1, 2, 3, 4, false);    
+        // Überprüfen, ob die erwarteten Funktionen aufgerufen wurden
+        expect(mockGetUserByName).toHaveBeenCalledTimes(0);
+        expect(mockPlayerbyUserId).toHaveBeenCalledTimes(0);
+        expect(mockGetGamebyPlayers).toHaveBeenCalledTimes(0);
+        expect(mockEndGame).toHaveBeenCalledTimes(0);
+    })
 })
 
