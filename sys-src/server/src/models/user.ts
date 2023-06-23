@@ -12,7 +12,7 @@ export interface IUserModel extends Model<IUser, {}, IUserMethods> {
   createUser(username: string, password_hash: string): Promise<HydratedDocument<IUser, IUserModel>>;
   getAllUsers(): Promise<HydratedDocument<IUser, IUserModel>[]>;
   getOneUser(userid: Schema.Types.ObjectId): Promise<HydratedDocument<IUser, IUserModel>>;
-  getUserByName(username: string): Promise<HydratedDocument<IUser, IUserModel>>;
+  getUserByName(username: string): Promise<HydratedDocument<IUser, IUserModel>|null >;
 }
 
 const userSchema: Schema<IUser, IUserModel> = new Schema<IUser, IUserModel>({

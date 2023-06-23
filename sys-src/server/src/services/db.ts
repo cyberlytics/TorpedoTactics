@@ -10,8 +10,8 @@ let playerids : Map<string, Schema.Types.ObjectId> = new Map<string, Schema.Type
 //save the started game to the db
 export async function saveStartedGame(username1:string,username2:string) {
     //gets players by usernames
-    const user1:HydratedDocument<IUser> = await User.getUserByName(username1);
-    const user2:HydratedDocument<IUser> = await User.getUserByName(username2);
+    const user1:HydratedDocument<IUser> |null = await User.getUserByName(username1);
+    const user2:HydratedDocument<IUser>|null = await User.getUserByName(username2);
     if(user1 == null || user2 == null){
         return;
     }
