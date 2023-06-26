@@ -4,7 +4,7 @@ import { Game, IGame, IGameMethods } from "../models/game";
 import { Player, IPlayer, IPlayerMethods } from "../models/player";
 
 //saves the playerids, so you don't have to query them from the database every time
-let playerids : Map<string, Schema.Types.ObjectId> = new Map<string, Schema.Types.ObjectId>();
+export let playerids : Map<string, Schema.Types.ObjectId> = new Map<string, Schema.Types.ObjectId>();
 
 
 //save the started game to the db
