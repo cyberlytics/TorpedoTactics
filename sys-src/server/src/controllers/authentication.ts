@@ -19,7 +19,7 @@ export const login = async (req: express.Request, res: express.Response) => {
       return;
     }
 
-    const user: HydratedDocument<IUser> = await User.getUserByName(username);
+    const user: HydratedDocument<IUser> | null = await User.getUserByName(username);
 
     /*
      * This code will go through the same process no matter what the user or the password is,
@@ -37,7 +37,8 @@ export const login = async (req: express.Request, res: express.Response) => {
     }
 
     // Generate JWT and save it on the session object
-    const token = jwt.sign({ username }, process.env.JWT_KEY);
+    const token = jwt.sign({ username }, process.env.JWT_KEY!);
+    //@ts-ignore
     req.session.token = token;
 
 
@@ -98,7 +99,7 @@ export const register = async (req: express.Request, res: express.Response) => {
  */
 export const signout = async (req: express.Request, res: express.Response) => {
   try {
-    //req.session = null;
+    req.session = null;
 
     return res.status(200).send({ message: 'Successful signed out!' });
   } catch (err: any) {
