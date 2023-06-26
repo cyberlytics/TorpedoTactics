@@ -3,12 +3,11 @@ concept.fdb_latexmk
 concept.fls
 concept.log
 concept.synctex.gz
-
-
 yarn.lock
 .yarnclean
 
 # gitinspector
+docker_run.txt
 gitinspector.html
 
 # compiled output
