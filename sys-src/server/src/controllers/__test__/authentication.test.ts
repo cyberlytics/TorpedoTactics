@@ -1,11 +1,8 @@
 import { Request, Response } from 'express';
-import {
-  login,
-  register,
-  signout,
-} from '../authentication';
+import { login, register, signout} from '../authentication';
+import { User } from '../../models/user';
 
-// Mocks fÃ¼r Request und Response
+// Mocks für Request und Response
 const mockRequest = (sessionData: any, bodyData: any) => ({
   body: bodyData,
   session: sessionData,
@@ -15,9 +12,30 @@ const mockResponse = () => {
   const res: Partial<Response> = {
     status: jest.fn().mockReturnThis(),
     send: jest.fn(),
+    json: jest.fn(),
   };
   return res as Response;
 };
+
+// Mock für den Datenbankaufruf
+jest.mock('../../models/user', () => {
+  const originalUser = jest.requireActual('../../models/user');
+  return {
+    User: {
+      getUserByName: jest.fn().mockResolvedValue({
+        username: 'testuser',
+        password_hash: 'hashedpassword',
+      }),
+      findOne: jest.fn().mockImplementation((query: any) => {
+        if (query.where.username === 'testuser') {
+          return Promise.resolve(true); // Benutzer existiert bereits
+        }
+        return Promise.resolve(false); // Benutzer existiert nicht
+      }),
+      ...originalUser.User, // Behalte die anderen Funktionen des ursprünglichen Moduls bei
+    },
+  };
+});
 
 describe('Authentication Controller', () => {
   describe('login', () => {
@@ -28,7 +46,8 @@ describe('Authentication Controller', () => {
       await login(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalledWith({ message: 'Successful signed in!' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Successful signed in!' });
+      expect(User.getUserByName).toHaveBeenCalledWith('testuser');
     });
   });
 
@@ -40,10 +59,11 @@ describe('Authentication Controller', () => {
       await register(req as Request, res as Response);
 
       expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.send).toHaveBeenCalledWith({
+      expect(res.json).toHaveBeenCalledWith({
         message: 'Successful signed up!',
         links: [{ href: '/api/auth/signin', rel: 'self', method: 'POST' }],
       });
+      expect(User.findOne).toHaveBeenCalledWith({ where: { username: 'testuser' } });
     });
   });
 
@@ -56,7 +76,7 @@ describe('Authentication Controller', () => {
 
       expect(req.session).toBeNull();
       expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.send).toHaveBeenCalledWith({ message: 'Successful signed out!' });
+      expect(res.json).toHaveBeenCalledWith({ message: 'Successful signed out!' });
     });
   });
 });
