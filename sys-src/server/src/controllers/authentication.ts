@@ -36,19 +36,12 @@ export const login = async (req: express.Request, res: express.Response) => {
       throw new BadRequestError('Invalid credentials', ['Change username or password.']);
     }
 
-    //Generate JWT
-    const userJwt = jwt.sign(
-      {
-        id: user._id,
-        username: user.username,
-      },
-      process.env.JWT_KEY!, // Add key to environment variable
-    );
-    //Store it on session object
-    req.session = {
-      jwt: userJwt,
-    };
+    // Generate JWT and save it on the session object
+    const token = jwt.sign({ username }, process.env.JWT_KEY);
+    req.session.token = token;
 
+
+    console.log('Bevor JWT: ' + process.env.JWT_KEY);
     return res.status(200).send({
       message: 'Successful signed in!',
     });
@@ -66,7 +59,7 @@ export const login = async (req: express.Request, res: express.Response) => {
  */
 export const register = async (req: express.Request, res: express.Response) => {
   try {
-    const { username, password } = req.body;
+    const { password, username } = req.body;
     if (!username || !password) {
       res.status(400).json({ message: 'Missing username or password' });
       return;
@@ -79,7 +72,7 @@ export const register = async (req: express.Request, res: express.Response) => {
 
     let password_hash = await Password.toHash(password);
 
-    const user: HydratedDocument<IUser>[] = await User.create(username, password_hash);
+    const user: HydratedDocument<IUser>|null  = await User.createUser(username, password_hash);
     if (!user) {
       res.status(400).json({ message: 'Something went wrong on User creation' });
       return;
@@ -105,7 +98,7 @@ export const register = async (req: express.Request, res: express.Response) => {
  */
 export const signout = async (req: express.Request, res: express.Response) => {
   try {
-    req.session = null;
+    //req.session = null;
 
     return res.status(200).send({ message: 'Successful signed out!' });
   } catch (err: any) {

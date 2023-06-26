@@ -24,6 +24,11 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 
+import axios from 'axios';
+const api = axios.create({
+  baseURL: 'http://localhost:3000'
+});
+
 const registerData = ref({
   name: '',
   password: ''
@@ -35,29 +40,33 @@ const loginData = ref({
 const showRegisterForm = ref(false);
 
 function register() {
-  // this.$router.push('/home');
-  // Replace this with your router logic
+  const data = {
+    username: registerData.value.name,
+    password: registerData.value.password
+  };
+
+  api.post('/api/auth/signup', data)
+    .then((response: { data: any; }) => {
+      console.log(response.data);
+    })
+    .catch((error: any) => {
+      console.error(error);
+    });
 }
 
 function login() {
-  // this.$router.push('/home');
-  // Replace this with your router logic
+  const data = {
+    username: loginData.value.name,
+    password: loginData.value.password
+  };
 
-  // axios.post('/api/login', {
-  //   name: loginData.value.name,
-  //   password: loginData.value.password
-  // })
-  // .then(response => {
-  //   // Überprüfen der Antwort vom Server und weiterleitung
-  //   if (response.data.success) {
-  //     this.$router.push('/lobby');
-  //   } else {
-  //     // Hier kann der entsprechende Logik für einen fehlgeschlagenen Login implementiert werden
-  //   }
-  // })
-  // .catch(error => {
-  //   // Fehlerbehandlung
-  // });
+  api.post('/api/auth/signin', data)
+    .then((response: { data: any; }) => {
+      console.log(response.data);
+    })
+    .catch((error: any) => {
+      console.error(error);
+    });
 }
 </script>
 
@@ -147,6 +156,7 @@ function login() {
     margin-top: 10px;
     margin-bottom: 10px;
   }
+
   .vertical-center{
     display: flex;
     flex-direction: column;
