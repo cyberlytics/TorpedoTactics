@@ -6,7 +6,7 @@ concept.synctex.gz
 yarn.lock
 .yarnclean
 
-# My Own files to ignore (don't touch)
+# gitinspector
 docker_run.txt
 gitinspector.html
 
