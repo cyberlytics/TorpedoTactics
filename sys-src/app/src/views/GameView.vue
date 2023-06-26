@@ -4,6 +4,7 @@
     :rooms="roomData"
     :userName="userName"
     :serverAvailable="serverAvailable"
+    :serverAdr="serverAdr"
     @createRoom="createRoom"
     @joinRoom="joinRoom"
   />
@@ -53,7 +54,8 @@ import { useFieldStore } from '@/stores/field';
 
 
 //#endregion imports
-const url = 'http://localhost:3000';
+const serverAdr = ref<string>("localhost:3000");
+const url = 'http://'+serverAdr.value;
 let socket = io(url);
 
 //server is available
